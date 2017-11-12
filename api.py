@@ -3,6 +3,8 @@ from wsgiref import simple_server
 
 import falcon
 
+from lib.ipfs import Tools
+
 from lib.db import MemeChainDB
 
 # Logging Code
@@ -69,10 +71,13 @@ class getMemeImgByHash(object):
 class addMeme(object):
 	_CHUNK_SIZE_BYTES = 4096
 	def on_post(self, req, resp):
+		# Generate random placeholder img name
+		img_placeholder_name = random.random().split(".")[1]
 		ext = mimetypes.guess_extension(req.content_type)
-		name = '{img_hash}{ext}'.format(img_hash=random.random().split(".")[1], ext=ext) # img_hash here needs to be IPFS ID or some random img identitifer that gets rebuilt and is random for every node (not an issue as this is just locally stored img)
-		image_path = os.path.join("./data", name) # This needs to be IPFS folder file path
-		
+		name = '{img_name}{ext}'.format(img_name=img_placeholder_name, ext=ext) 
+		image_path = os.path.join("./data", name)
+
+		# Write image to local storage
 		with io.open(image_path, 'wb') as image_file:
 			while True:
 				chunk = req.stream.read(self._CHUNK_SIZE_BYTES)
@@ -80,6 +85,16 @@ class addMeme(object):
 					break
 
 				image_file.write(chunk)
+
+		# Add image to ipfs
+		ipfs_id = Tools().add_meme(imgage_path)['Hash']
+
+		# Rename local img file to ipfs_id for easy reference
+		new_name = '{img_name}{ext}'.format(img_name=ipfs_id, ext=ext)
+		os.rename(image_path, os.path.join("./data", new_name))
+		
+		# Add to kekcoin chain
+		###
 
         resp.status = falcon.HTTP_201
 

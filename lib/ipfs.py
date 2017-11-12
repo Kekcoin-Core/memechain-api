@@ -1,13 +1,13 @@
-import ipfsApi
+import ipfsapi
 import os
 import io
 
 class Tools():
 	def __init__(self):
-		self.api = ipfsApi.Client('127.0.0.1', 5001)
+		self.api = ipfsapi.Client('127.0.0.1', 5001)
 		try:
-			ipfsApi.assert_version(self.api.version()['Version'], minimum='0.4.3', maximum='0.5.0')
-		except ipfsApi.exceptions.VersionMismatch:
+			ipfsapi.assert_version(self.api.version()['Version'], minimum='0.4.3', maximum='0.5.0')
+		except ipfsapi.exceptions.VersionMismatch:
 			return "Please update the IPFS daemon."
 
 	def add_meme(self, filepath):
@@ -15,7 +15,7 @@ class Tools():
 		#Note: Possible to recursively add all memes in a directory - but not implemented. 
 		try:
 			with open(filepath, 'rb') as f:
-				res = self.api.add(f, recursive) 
+				res = self.api.add(f, False) 
 			return res
 		except IOError:
 			print("File {0} does not exist and couldn't be added.".format(filepath))
@@ -36,7 +36,7 @@ class Tools():
 				os.rename(multihash, subdirectory+'/'+multihash+".jpg")
 			elif subdirectory is None:
 				os.rename(multihash, multihash+'.jpg')
-		except ipfsApi.exceptions.StatusError:
+		except ipfsapi.exceptions.StatusError:
 			print("Invalid multihash supplied. File could not be retrieved.")
 			return False
 
@@ -50,12 +50,12 @@ class Tools():
 		"""
 		try:
 			return self.api.cat(multihash)
-		except ipfsApi.exceptions.StatusError:
+		except ipfsapi.exceptions.StatusError:
 			print("Invalid multihash supplied. File contents could not be retrieved.")
 			return False
 
 	def clear_local_file(self, filepath, recursive=False):
-		#Todo: figure out why this raises ipfsApi.exceptions.ErrorResponse but still removes pin.
+		#Todo: figure out why this raises ipfsapi.exceptions.ErrorResponse but still removes pin.
 		
 		## These are the functions to perform:
 		# self.api.pin_rm(filepath, recursive)
@@ -70,8 +70,8 @@ class Tools():
 
 		try:
 			self.api.pin_rm(filepath, recursive)
-		except ipfsApi.exceptions.ErrorResponse:
-			print("Exception ipfsApi.exceptions.ErrorResponse thrown.")
+		except ipfsapi.exceptions.ErrorResponse:
+			print("Exception ipfsapi.exceptions.ErrorResponse thrown.")
 		
 		self.api.repo_gc()
 
@@ -94,7 +94,7 @@ class Tools():
 		#Haven't successfuly connected to a peer yet?
 		try:
 			return self.api.swarm_connect(address)
-		except ipfsApi.exceptions.ErrorResponse:
+		except ipfsapi.exceptions.ErrorResponse:
 			print "Connection failure. Connection refused."
 
 	def disconnect_from_peer(self, address):
@@ -106,7 +106,7 @@ class Tools():
 		"""
 		try:
 			return self.api.swarm_disconnect(address)
-		except ipfsApi.exceptions.ErrorResponse:
+		except ipfsapi.exceptions.ErrorResponse:
 			print("Invalid IPFS peer address provided.")
 			return False
 
@@ -128,4 +128,3 @@ class Tools():
 			}'''))
 
 		return key
-
