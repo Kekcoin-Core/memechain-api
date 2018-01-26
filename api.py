@@ -1,10 +1,7 @@
 import logging, json, io, os, mimetypes, random
-from wsgiref import simple_server
-
 import falcon
 
 from lib.ipfs import Tools
-
 from lib.db import MemeChainDB
 
 # Logging Code
@@ -131,5 +128,7 @@ app.add_route('/api/addauthoredmeme', addAuthoredMeme())
 
 ## For development purposes only ## 
 if __name__ == '__main__':
-    httpd = simple_server.make_server('127.0.0.1', 1337, app)
-    httpd.serve_forever()
+	from wsgiref import simple_server
+
+	httpd = simple_server.make_server('127.0.0.1', 1337, app)
+	httpd.serve_forever()

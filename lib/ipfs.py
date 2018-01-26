@@ -1,6 +1,5 @@
+import os, io
 import ipfsapi
-import os
-import io
 
 class Tools():
 	def __init__(self):
