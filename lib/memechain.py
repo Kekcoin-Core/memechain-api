@@ -1,4 +1,4 @@
-from OP_RETURN import OP_RETURN_store
+import op_return
 
 class Validate():
 	"""
@@ -71,8 +71,15 @@ class MemeChainTX():
 				temp.append(item[0])
 			lowest_char = min(temp)
 			
-	def store(data, testnet = False):
-		OP_RETURN_store(data, testnet):
+	def store(data):
+		# Embed data into op_return transaction
+		raw_op_return = create_raw_op_return_transaction(data)
+		# Sign raw op_return transaction
+		signed_raw_op_return = sign_raw_transaction(raw_op_return)
+		# Broadcast raw transaction to Kekcoin blockchain
+		txid = send_raw_transaction(signed_raw_op_return)
+
+		return txid
 
 
 
