@@ -4,7 +4,15 @@ This is the development repository for the Kekcoin MemeChain API. THIS IS NOT RE
 
 ## Installing
 
-We will be making an installation / setup guide soon.
+### Python Dependencies
+
+```
+pip install tinydb, ujson, falcon, ipfsapi, python-bitcoinrpc
+```
+
+For increased JSON performance on db use ujson (tinydb will autodetect).
+
+We will be making a full installation / setup guide soon.
 
 ## Social Channels
 
