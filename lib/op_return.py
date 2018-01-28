@@ -24,6 +24,12 @@ MAX_OP_RETURN_BYTES = 80
 rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") % (RPC_USER, RPC_PASS, RPC_PORT))
 
 def get_input():
+	"""
+	Method used to get unspent inputs
+
+	Returns:
+		Transaction object (dict)
+	"""
 	unspent = rpc.listunspent()
 
 	for tx in unspent:
@@ -32,7 +38,16 @@ def get_input():
 	else:
 		raise Exception("No valid inputs, inputs must be greater than 0.001 KEK")
 
-def create_raw_op_return(metadata):
+def create_raw_op_return_transaction(metadata):
+	"""
+	Method used to create a transaction with embedded data through OP_RETURN
+
+	Args:
+		metadata (str)
+
+	Returns:
+		Raw transaction (hex)
+	"""
 	if sys.getsizeof(metadata) > MAX_OP_RETURN_BYTES:
 		raise Exception("Metadata size is over MAX_OP_RETURN_BYTES")
 
@@ -55,12 +70,39 @@ def create_raw_op_return(metadata):
 	return op_return_tx
 
 def sign_raw_transaction(tx):
+	"""
+	Method used to sign raw transaction
+
+	Args:
+		Raw transaction (hex)
+
+	Returns:
+		Signed raw transaction (hex)
+	"""
 	return rpc.signrawtransaction(tx)["hex"]
 
 def send_raw_transaction(tx_hex):
+	"""
+	Method used to send raw transaction to the Kekcoin chain
+
+	Args:
+		Signed raw transaction (hex)
+
+	Returns:
+		Transaction id (str)
+	"""
 	return rpc.sendrawtransaction(tx_hex)
 
 def get_op_return_data(txid):
+	"""
+	Method used to get op_return data from transaction
+
+	Args:
+		Transaction id (str)
+
+	Returns:
+		Embedded metadata (str)
+	"""
 	raw_tx = rpc.getrawtransaction(txid)
 	tx_data = rpc.decoderawtransaction(raw_tx)
 

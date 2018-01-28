@@ -104,25 +104,25 @@ class addAuthoredMeme(object):
 # Falcon API
 app = falcon.API()
 
-# Height Command
+# Height command
 app.add_route('/api/getheight', getMemeChainHeight())
 
-# Get Meme Data By Height Command
+# Get meme data by height command
 app.add_route('/api/getmemedatabyheight/{height}', getMemeDataByHeight())
 
-# Get Meme Data by Hash Command
+# Get meme data by hash command
 app.add_route('/api/getmemedatabyhash/{ipfs_id}', getMemeDataByHash())
 
-# Get Meme Img by Height Command
+# Get meme img by height command
 app.add_route('/api/getmemeimgbyheight/{height}', getMemeImgByHeight())
 
-# Get Meme Img by Hash Command
+# Get meme img by hash command
 app.add_route('/api/getmemeimgbyhash/{ipfs_id}', getMemeImgByHash())
 
-# Add Meme Command
+# Add meme command
 app.add_route('/api/addmeme', addMeme())
 
-# Add Authored Meme Command
+# Add authored meme command
 app.add_route('/api/addauthoredmeme', addAuthoredMeme())
 
 
