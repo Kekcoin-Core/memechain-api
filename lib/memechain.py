@@ -1,3 +1,5 @@
+from hashlib import sha256
+
 import op_return
 
 class Validate():
@@ -20,66 +22,42 @@ class Validate():
 		pass
 
 
-class MemeChainTX():
+class MemeTX():
 	"""
 	MemeChain TX object. Used to construct a MemeChainTX.
 	"""
-	def __init__(self, ipfs_id, img_hash, hashlink):
+	def __init__(self, ipfs_id):
 		self.ipfs_id = ipfs_id
-		self.img_hash = img_hash
-		self.hashlink + hashlink
-
 		self._is_valid = False
 	
-	def meme_is_valid(self):
+	def set_is_valid(self):
 		self._is_valid = True
 
 	def is_meme_valid(self):
 		return self._is_valid
 
-	def ipfs_id(self):
+	def get_ipfs_id(self):
 		return self.ipfs_id
 
-	def img_hash(self):
-		return self.img_hash
-
-	def hash_link(self, cur_meme_id, prev_meme_ids = []):
+	def get_img_hash(self):
 		"""
-		This function takes as input the IPFS ID of the new meme to add to the chain, and computes the hash of it 
-		concatenated with each of the previous meme hashes in an order specified by the _order_equilevel_memes() function.
-		This hash, the 'hash link', is returned.
+		SHA2-256 hash of image
 		"""
-		prev_meme_ids = _order_equilevel_memes(prev_meme_ids)
-		string = ''
-		for item in prev_meme_ids:
-			string += item
-		hashable = cur_meme_id + string
-		self.hashlink = hash(hashable)
-		return self.hashlink
+		return self.ipfs_id[2:]
 
-	def _order_equilevel_memes(ipfs_ids = []):
+	def get_txid(self):
+		return self.txid
+
+	def get_hashlink(self):
+		return self.hashlink 
+
+	def generate_hashlink(self, prev_block_memes):
 		"""
-		Take as input memechain ipfs IDs from a given block, as it appears on the blockchain, and order it alphanumerically,
-		i.e. a,b,c,.....,y,z,0,1,2,...,9. The ordering is returned as a list of IPFS IDs [<ipfs ID>, <ipfs ID>, ...].
+		Method used to generate hash link
+		Args:
+			prev_block_memes (array of dicts)
 		"""
-		#all ipfs id's are the same length, 46 characters. So:
-		#compare elements in the strings until one of them is greater/lower than the others
-		ordered_ids = []
-		temp = []
-		for i in range(0,45):
-			for item in ipfs_ids:
-				temp.append(item[0])
-			lowest_char = min(temp)
-			
-	def store(data):
-		# Embed data into op_return transaction
-		raw_op_return = create_raw_op_return_transaction(data)
-		# Sign raw op_return transaction
-		signed_raw_op_return = sign_raw_transaction(raw_op_return)
-		# Broadcast raw transaction to Kekcoin blockchain
-		txid = send_raw_transaction(signed_raw_op_return)
-
-		return txid
-
-
+		raw_str = prev_block_memes[0]['hashlink']
+		raw_str += ''.join(meme['ipfs_id'] for meme in prev_block_memes)
+		self.hashlink = sha256(raw_str)[:16]
 
