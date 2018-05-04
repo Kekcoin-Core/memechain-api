@@ -1,6 +1,9 @@
-from hashlib import sha256
 import os
-import op_return
+
+from hashlib import sha256
+
+from op_return import *
+from ipfs import IPFSTools
 
 class Validate():
 	"""
@@ -43,8 +46,7 @@ class Validate():
 		if os.path.exists(ipfs_id):
 			return False 	 #Meme already exists locally
 		else:
-			tools = Tools()
-			if not tools.get_meme(ipfs_id, ipfs_dir):
+			if not IPFSTools().get_meme(ipfs_id, ipfs_dir):
 				return True  #Meme does not exist on IPFS yet
 			else:
 				return False #Meme already exists on global IPFS

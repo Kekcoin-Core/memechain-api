@@ -1,7 +1,8 @@
 import logging, json, io, os, mimetypes, random
+
 import falcon
 
-from lib.ipfs import Tools
+from lib.ipfs import IPFSTools
 from lib.db import MemeChainDB
 
 # Logging Code
@@ -84,7 +85,7 @@ class addMeme(object):
 				image_file.write(chunk)
 
 		# Add image to ipfs
-		ipfs_id = Tools().add_meme(imgage_path)['Hash']
+		ipfs_id = IPFSTools().add_meme(imgage_path)['Hash']
 
 		# Rename local img file to ipfs_id for easy reference
 		new_name = '{img_name}{ext}'.format(img_name=ipfs_id, ext=ext)
