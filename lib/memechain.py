@@ -5,7 +5,7 @@ from hashlib import sha256
 from op_return import *
 from ipfs import IPFSTools
 
-class Validate():
+class Validate(object):
 	"""
 	Validator class for MemeChainTX object.
 	"""
@@ -66,14 +66,16 @@ class Validate():
 		except:
 			return False
 
-class MemeTX():
+class MemeTX(object):
 	"""
 	MemeChain TX object. Used to construct a MemeChainTX.
 	"""
 	def __init__(self, ipfs_id):
+		self._identifier = '3ae4' # Identifier is first 4 letters of the SHA256 hash of KEK
+
 		self.ipfs_id = ipfs_id
 		self._is_valid = False
-	
+		
 	def set_is_valid(self):
 		self._is_valid = True
 
@@ -105,3 +107,10 @@ class MemeTX():
 		raw_str += ''.join(meme['ipfs_id'] for meme in prev_block_memes)
 		self.hashlink = sha256(raw_str)[:16]
 
+	def blockchain_write(self):
+		if "hashlink" not in locals().keys():
+			raise ValueError("Hashlink has not been generated.")
+		else:
+			rawtx = create_raw_op_return_transaction(self._identifier + self.ipfs_id + self.hashlink)
+			signedtx = sign_raw_transaction(rawtx)
+			self.txid = send_raw_transaction(signedtx)

@@ -2,7 +2,7 @@ import os, io
 
 import ipfsapi
 
-class IPFSTools():
+class IPFSTools(object):
 	def __init__(self):
 		self.api = ipfsapi.Client('127.0.0.1', 5001)
 		try:

@@ -35,7 +35,7 @@ class Index(object):
     def __getitem__(self, idx):
         return self.ranked()[idx]
 
-class MemeChainDB():
+class MemeChainDB(object):
 	def __init__(self, db_path):
 		self._db = TinyDB(db_path)
 
