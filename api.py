@@ -20,7 +20,7 @@ class getMemeChainHeight(object):
 	def on_get(self, req, resp):
 		db = MemeChainDB('data/memechain.json')
 
-		height = db.get_height()
+		height = db.get_memechain_height()
 
 		resp.status = falcon.HTTP_200  # This is the default status
 		resp.set_header('Powered-By', 'MemeChain')
@@ -34,7 +34,7 @@ class getMemeDataByHeight(object):
 	def on_get(self, req, resp, height):
 		db = MemeChainDB('data/memechain.json')
 
-		meme_metadata = db.search_by_height(height)
+		meme_metadata = db.search_by_memechain_height(height)
 
 		resp.status = falcon.HTTP_200  # This is the default status
 		resp.set_header('Powered-By', 'MemeChain')

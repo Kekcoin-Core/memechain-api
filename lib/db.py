@@ -39,13 +39,13 @@ class MemeChainDB():
 	def __init__(self, db_path):
 		self._db = TinyDB(db_path)
 
-	def add_meme(self, ipfs_id, hashlink, txid, block):
-		self._db.insert({"ipfs_id" : ipfs_id, "hashlink": hashlink, "txid": txid, "block" : block})
+	def add_meme(self, ipfs_id, hashlink, txid, block, imgformat):
+		self._db.insert({"ipfs_id" : ipfs_id, "hashlink": hashlink, "txid": txid, "block" : block, "imgformat" : imgformat})
 
 	def remove_meme(self, ipfs_id):
 		self._db.remove(Query().ipfs_id == ipfs_id)
 
-	def get_height(self):
+	def get_memechain_height(self):
 		return len(self._db)
 
     def search_by_block(self, block):
@@ -56,7 +56,7 @@ class MemeChainDB():
         """
         return self._db.get(Query().block == block)
 
-	def search_by_height(self, height):
+	def search_by_memechain_height(self, height):
 		"""
 		Get a meme entry using height as the search parameter
 
@@ -71,4 +71,12 @@ class MemeChainDB():
 		ipfs_id - String
 		"""
 		return self._db.get(Query().ipfs_id == ipfs_id)
+
+    def search_by_txid(self, txid):
+        """
+        Get a meme entry using its Kekcoin txid as the search parameter
+        
+        txid - String
+        """
+        return self._db.get(Query().txid == txid)
 
