@@ -80,3 +80,16 @@ class MemeChainDB(object):
         """
         return self._db.get(Query().txid == txid)
 
+    def get_prev_block_memes(self):
+        """
+        Get an array with the memes in the previous kekcoin block
+        """
+        memechain_height = self.get_memechain_height()
+        
+        if memechain_height == 0:
+            return None
+
+        else:
+            last_meme = self.search_by_memechain_height(memechain_height)
+    
+            return self._db.get(Query().block == last_meme["block"])
