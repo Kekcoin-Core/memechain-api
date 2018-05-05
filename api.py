@@ -4,6 +4,7 @@ import falcon
 
 from lib.ipfs import IPFSTools
 from lib.db import MemeChainDB
+from lib.memechain import MemeTx, Validate
 
 # Logging Code
 logger = logging.getLogger('memechain')
@@ -69,6 +70,8 @@ class getMemeImgByHash(object):
 class addMeme(object):
 	_CHUNK_SIZE_BYTES = 4096
 	def on_post(self, req, resp):
+		db = MemeChainDB('data/memechain.json')
+
 		# Generate random placeholder img name
 		img_placeholder_name = random.random().split(".")[1]
 		ext = mimetypes.guess_extension(req.content_type)
@@ -91,11 +94,49 @@ class addMeme(object):
 		new_name = '{img_name}{ext}'.format(img_name=ipfs_id, ext=ext)
 		os.rename(image_path, os.path.join("./data", new_name))
 		
-		# Add to kekcoin chain
-		###
+		# Add to Kekcoin chain
+		memetx = MemeTx(ipfs_id)
+		prev_block_memes = db.get_prev_block_memes()
 
-        resp.status = falcon.HTTP_201
+		if prev_block_memes:
+			memetx.generate_hashlink(prev_block_memes)
 
+			Validate(memetx, db = db, ipfs_dir = "./data", prev_block_memes = prev_block_memes)
+
+			if memetx.is_meme_valid():
+				memetx.blockchain_write()
+
+				resp.status = falcon.HTTP_201
+				resp.set_header('Powered-By', 'MemeChain')
+
+				resp.body = json.dumps({
+					'success' : True,
+					'result' : ipfs_id
+					})
+
+			else:
+				resp.status = falcon.HTTP_201
+				resp.set_header('Powered-By', 'MemeChain')
+
+				resp.body = json.dumps({
+					'success' : False,
+					'error' : "Meme is invalid."
+					})		
+
+		else:
+			# Genesis block logic
+			memetx = MemeTx(ipfs_id)
+			meme.generate_genesis_hashlink()
+
+			memetx.blockchain_write()
+
+			resp.status = falcon.HTTP_201
+			resp.set_header('Powered-By', 'MemeChain')
+
+			resp.body = json.dumps({
+					'success' : True,
+					'result' : ipfs_id
+					})
 
 class addAuthoredMeme(object):
 	def on_post(self, req, resp):

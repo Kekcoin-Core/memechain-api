@@ -9,8 +9,8 @@ class Validate(object):
 	"""
 	Validator class for MemeChainTX object.
 	"""
-	def __init__(self, MemeTX, db_path, ipfs_dir, prev_block_memes):
-		is_valid = [self.check_duplicate(MemeTX.get_ipfs_id(), db_path), self.check_ipfs_existance(ipfs_id, ipfs_dir), self.is_valid_hash_link(prev_block_memes), self.check_cloudvision()]
+	def __init__(self, MemeTX, db, ipfs_dir, prev_block_memes):
+		is_valid = [self.check_duplicate(MemeTX.get_ipfs_id(), db), self.check_ipfs_existance(ipfs_id, ipfs_dir), self.is_valid_hash_link(prev_block_memes), self.check_cloudvision()]
 
 		if not False in is_valid:
 			MemeTX.set_is_valid()
@@ -47,14 +47,13 @@ class Validate(object):
 			else:
 				return False #Meme already exists on global IPFS
 
-	def check_duplicate(self, db_path, ipfs_id):
+	def check_duplicate(self, db, ipfs_id):
 		"""
 		Checks whether a MemeTX with ipfs_id is in MemeChainDB.
 		Args:
 			db_path - path of MemeChainDB data store
 			ipfs_id - attribute of MemeTX
 		"""
-		db = MemeChainDB(db_path)
 		try:
 			db.search_by_ipfs_id(ipfs_id)
 			return True
@@ -91,7 +90,10 @@ class MemeTX(object):
 		return self.txid
 
 	def get_hashlink(self):
-		return self.hashlink 
+		return self.hashlink
+
+	def generate_genesis_hashlink(self):
+		self.hashlink = sha256(self.ipfs_id)[:16]
 
 	def generate_hashlink(self, prev_block_memes):
 		"""
