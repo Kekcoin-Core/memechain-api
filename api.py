@@ -17,7 +17,7 @@ logger.setLevel(logging.WARNING)
 #logger.error('We have a problem')
 #logger.info('While this is just chatty')
 
-class getMemeChainHeight(object):
+class get_memechain_height(object):
 	def on_get(self, req, resp):
 		db = MemeChainDB('data/memechain.json')
 
@@ -31,7 +31,7 @@ class getMemeChainHeight(object):
 			'result' : height
 			})
 
-class getMemeDataByHeight(object):
+class get_meme_data_by_height(object):
 	def on_get(self, req, resp, height):
 		db = MemeChainDB('data/memechain.json')
 
@@ -45,7 +45,7 @@ class getMemeDataByHeight(object):
 			'result' : meme_metadata
 			})
 
-class getMemeDataByHash(object):
+class get_meme_daya_by_hash(object):
 	def on_get(self, req, resp, ipfs_id):
 		db = MemeChainDB('data/memechain.json')
 
@@ -59,15 +59,15 @@ class getMemeDataByHash(object):
 			'result' : meme_metadata
 			})
 
-class getMemeImgByHeight(object):
+class get_meme_img_by_height(object):
 	def on_get(self, req, resp):
 		pass
 
-class getMemeImgByHash(object):
+class get_meme_img_by_hash(object):
 	def on_get(self, req, resp):
 		pass
 
-class addMeme(object):
+class add_meme(object):
 	_CHUNK_SIZE_BYTES = 4096
 	def on_post(self, req, resp):
 		db = MemeChainDB('data/memechain.json')
@@ -115,7 +115,7 @@ class addMeme(object):
 					})
 
 			else:
-				resp.status = falcon.HTTP_201
+				resp.status = falcon.HTTP_400
 				resp.set_header('Powered-By', 'MemeChain')
 
 				resp.body = json.dumps({
@@ -138,7 +138,7 @@ class addMeme(object):
 					'result' : ipfs_id
 					})
 
-class addAuthoredMeme(object):
+class add_authored_meme(object):
 	def on_post(self, req, resp):
 		pass
 
@@ -147,25 +147,25 @@ class addAuthoredMeme(object):
 app = falcon.API()
 
 # Height command
-app.add_route('/api/getheight', getMemeChainHeight())
+app.add_route('/api/getheight', get_memechain_height())
 
 # Get meme data by height command
-app.add_route('/api/getmemedatabyheight/{height}', getMemeDataByHeight())
+app.add_route('/api/getmemedatabyheight/{height}', get_meme_data_by_height())
 
 # Get meme data by hash command
-app.add_route('/api/getmemedatabyhash/{ipfs_id}', getMemeDataByHash())
+app.add_route('/api/getmemedatabyhash/{ipfs_id}', get_meme_data_by_hash())
 
 # Get meme img by height command
-app.add_route('/api/getmemeimgbyheight/{height}', getMemeImgByHeight())
+app.add_route('/api/getmemeimgbyheight/{height}', get_meme_img_by_height())
 
 # Get meme img by hash command
-app.add_route('/api/getmemeimgbyhash/{ipfs_id}', getMemeImgByHash())
+app.add_route('/api/getmemeimgbyhash/{ipfs_id}', get_meme_img_by_hash())
 
 # Add meme command
-app.add_route('/api/addmeme', addMeme())
+app.add_route('/api/addmeme', add_meme())
 
 # Add authored meme command
-app.add_route('/api/addauthoredmeme', addAuthoredMeme())
+app.add_route('/api/addauthoredmeme', add_authored_meme())
 
 
 ## For development purposes only ## 
