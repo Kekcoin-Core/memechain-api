@@ -1,4 +1,4 @@
-import logging, json, io, os, mimetypes, random
+import logging, json, io, os, mimetypes, random, re
 
 import falcon
 
@@ -16,6 +16,10 @@ logger.setLevel(logging.WARNING)
 
 #logger.error('We have a problem')
 #logger.info('While this is just chatty')
+
+class get_info(object):
+	def on_get(self, req, resp):
+		pass
 
 class get_memechain_height(object):
 	def on_get(self, req, resp):
@@ -37,6 +41,9 @@ class get_meme_data_by_height(object):
 
 		meme_metadata = db.search_by_memechain_height(height)
 
+		if not meme_metadata:
+			raise falcon.HTTPError(falcon.HTTP_404, 'Database Error', "Meme not found.")
+
 		resp.status = falcon.HTTP_200  # This is the default status
 		resp.set_header('Powered-By', 'MemeChain')
 
@@ -45,11 +52,14 @@ class get_meme_data_by_height(object):
 			'result' : meme_metadata
 			})
 
-class get_meme_daya_by_hash(object):
+class get_meme_data_by_hash(object):
 	def on_get(self, req, resp, ipfs_id):
 		db = MemeChainDB('data/memechain.json')
 
 		meme_metadata = db.search_by_ipfs_id(ipfs_id)
+
+		if not meme_metadata:
+			raise falcon.HTTPError(falcon.HTTP_404, 'Database Error', "Meme not found.")
 
 		resp.status = falcon.HTTP_200  # This is the default status
 		resp.set_header('Powered-By', 'MemeChain')
@@ -60,15 +70,72 @@ class get_meme_daya_by_hash(object):
 			})
 
 class get_meme_img_by_height(object):
-	def on_get(self, req, resp):
-		pass
+	_IMAGE_NAME_PATTERN = re.compile(
+        '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z]{2,4}$'
+    )
+	def on_get(self, req, resp, height):
+		db = MemeChainDB('data/memechain.json')
+
+		meme_metadata = db.search_by_memechain_height(height)
+
+		# Generate image file path
+		name = '{img_name}{ext}'.format(img_name=meme_metadata["ipfs_id"], ext=meme_metadata["imgformat"]) 
+		image_path = os.path.join("./data", name)
+		
+
+		if not self._IMAGE_NAME_PATTERN.match(name):
+			# 404 Not found response
+			raise falcon.HTTPError(falcon.HTTP_404,'Database Error', "Meme not found.")
+
+		else:
+			# Open image file
+			stream = io.open(image_path, 'rb')
+			stream_len = os.path.getsize(image_path)
+
+			# Generate image response
+			resp.status = falcon.HTTP_200
+			resp.set_header('Powered-By', 'MemeChain')
+			resp.content_type = mimetypes.guess_type(name)[0]
+			resp.stream, resp.stream_len = stream, stream_len
 
 class get_meme_img_by_hash(object):
-	def on_get(self, req, resp):
-		pass
+	_IMAGE_NAME_PATTERN = re.compile(
+        '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z]{2,4}$'
+    )
+	def on_get(self, req, resp, ipfs_id):
+		db = MemeChainDB('data/memechain.json')
+
+		meme_metadata = db.search_by_ipfs_id(ipfs_id)
+
+		# Generate image file path
+		name = '{img_name}{ext}'.format(img_name=meme_metadata["ipfs_id"], ext=meme_metadata["imgformat"]) 
+		image_path = os.path.join("./data", name)
+		
+
+		if not self._IMAGE_NAME_PATTERN.match(name):
+			# 404 Not found response
+			raise falcon.HTTPError(falcon.HTTP_404,'Database Error', "Meme not found.")
+
+		else:
+			# Open image file
+			stream = io.open(image_path, 'rb')
+			stream_len = os.path.getsize(image_path)
+
+			# Generate image response
+			resp.status = falcon.HTTP_200
+			resp.set_header('Powered-By', 'MemeChain')
+			resp.content_type = mimetypes.guess_type(name)[0]
+			resp.stream, resp.stream_len = stream, stream_len
 
 class add_meme(object):
 	_CHUNK_SIZE_BYTES = 4096
+	_ALLOWED_IMAGE_TYPES = ('image/gif', 'image/jpeg', 'image/png')
+	
+	def validate_image_type(req, resp, resource, params):
+		if req.content_type not in self._ALLOWED_IMAGE_TYPES:
+			raise falcon.HTTPError(falcon.HTTP_400, 'Memechain Error', "Meme file extension not supported.")
+
+	@falcon.before(validate_image_type)
 	def on_post(self, req, resp):
 		db = MemeChainDB('data/memechain.json')
 
@@ -115,13 +182,7 @@ class add_meme(object):
 					})
 
 			else:
-				resp.status = falcon.HTTP_400
-				resp.set_header('Powered-By', 'MemeChain')
-
-				resp.body = json.dumps({
-					'success' : False,
-					'error' : "Meme is invalid."
-					})		
+				raise falcon.HTTPError(falcon.HTTP_400, "Memechain error", "Meme has not passed memechain validation.")
 
 		else:
 			# Genesis block logic
@@ -145,6 +206,9 @@ class add_authored_meme(object):
 
 # Falcon API
 app = falcon.API()
+
+# Get node info command
+app.add_route('/api/getinfo', get_info())
 
 # Height command
 app.add_route('/api/getheight', get_memechain_height())
