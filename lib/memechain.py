@@ -61,7 +61,7 @@ class Validate(object):
 		except:
 			return False
 
-class MemeTX(object):
+class MemeTx(object):
 	"""
 	MemeChain TX object. Used to construct a MemeChainTX.
 	"""

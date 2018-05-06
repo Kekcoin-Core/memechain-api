@@ -5,7 +5,7 @@ import falcon
 from falcon import testing
 import pytest
 
-from ..api import app
+from api import app
 
 @pytest.fixture
 def client():
@@ -16,7 +16,7 @@ def client():
 def test_api_call(client):
 	
 	known_result = 0
-	response = client.simulate_get('/api/gettest')
+	response = client.simulate_get('/api/getheight')
 	queried_result = response.json['result']
 	assert known_result == queried_result
 

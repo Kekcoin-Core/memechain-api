@@ -62,7 +62,10 @@ class MemeChainDB(object):
 
         height - Float (0 is genesis) 
         """
-        return Index(self._db)[height]
+        if height == 0:
+            return None
+        else:
+            return Index(self._db)[height]
 
     def search_by_ipfs_id(self, ipfs_id):
         """

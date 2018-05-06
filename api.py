@@ -4,7 +4,7 @@ import falcon
 
 from lib.ipfs import IPFSTools
 from lib.db import MemeChainDB
-from lib.memechain import MemeTX, Validate
+from lib.memechain import MemeTx, Validate
 
 # Logging Code
 logger = logging.getLogger('memechain')
@@ -16,15 +16,6 @@ logger.setLevel(logging.WARNING)
 
 #logger.error('We have a problem')
 #logger.info('While this is just chatty')
-class get_test(object):
-	def on_get(self, req, resp):
-		resp.status = falcon.HTTP_200  # This is the default status
-		resp.set_header('Powered-By', 'MemeChain')
-
-		resp.body = json.dumps({
-			'success' : True,
-			'result' : 0
-			})
 
 class get_info(object):
 	def on_get(self, req, resp):
@@ -36,7 +27,7 @@ class get_memechain_height(object):
 
 		height = db.get_memechain_height()
 
-		resp.status = falcon.HTTP_200  # This is the default status
+		resp.status = falcon.HTTP_200  
 		resp.set_header('Powered-By', 'MemeChain')
 
 		resp.body = json.dumps({
@@ -53,7 +44,7 @@ class get_meme_data_by_height(object):
 		if not meme_metadata:
 			raise falcon.HTTPError(falcon.HTTP_404, 'Database Error', "Meme not found.")
 
-		resp.status = falcon.HTTP_200  # This is the default status
+		resp.status = falcon.HTTP_200  
 		resp.set_header('Powered-By', 'MemeChain')
 
 		resp.body = json.dumps({
@@ -70,7 +61,7 @@ class get_meme_data_by_hash(object):
 		if not meme_metadata:
 			raise falcon.HTTPError(falcon.HTTP_404, 'Database Error', "Meme not found.")
 
-		resp.status = falcon.HTTP_200  # This is the default status
+		resp.status = falcon.HTTP_200  
 		resp.set_header('Powered-By', 'MemeChain')
 
 		resp.body = json.dumps({
@@ -79,9 +70,7 @@ class get_meme_data_by_hash(object):
 			})
 
 class get_meme_img_by_height(object):
-	_IMAGE_NAME_PATTERN = re.compile(
-        '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z]{2,4}$'
-    )
+	_IMAGE_NAME_PATTERN = re.compile('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z]{2,4}$')
 	def on_get(self, req, resp, height):
 		db = MemeChainDB('data/memechain.json')
 
@@ -108,9 +97,7 @@ class get_meme_img_by_height(object):
 			resp.stream, resp.stream_len = stream, stream_len
 
 class get_meme_img_by_hash(object):
-	_IMAGE_NAME_PATTERN = re.compile(
-        '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z]{2,4}$'
-    )
+	_IMAGE_NAME_PATTERN = re.compile('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z]{2,4}$')
 	def on_get(self, req, resp, ipfs_id):
 		db = MemeChainDB('data/memechain.json')
 
@@ -140,7 +127,7 @@ class add_meme(object):
 	_CHUNK_SIZE_BYTES = 4096
 	_ALLOWED_IMAGE_TYPES = ('image/gif', 'image/jpeg', 'image/png')
 	
-	def validate_image_type(req, resp, resource, params):
+	def validate_image_type(self, req, resp, resource, params):
 		if req.content_type not in self._ALLOWED_IMAGE_TYPES:
 			raise falcon.HTTPError(falcon.HTTP_400, 'Memechain Error', "Meme file extension not supported.")
 
@@ -249,4 +236,5 @@ if __name__ == '__main__':
 	from wsgiref import simple_server
 
 	httpd = simple_server.make_server('127.0.0.1', 1337, app)
+	print "Running MemeChain dev server..."
 	httpd.serve_forever()
