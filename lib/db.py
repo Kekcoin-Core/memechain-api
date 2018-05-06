@@ -36,17 +36,17 @@ class Index(object):
         return self.ranked()[idx]
 
 class MemeChainDB(object):
-	def __init__(self, db_path):
-		self._db = TinyDB(db_path)
+    def __init__(self, db_path):
+        self._db = TinyDB(db_path)
 
-	def add_meme(self, ipfs_id, hashlink, txid, block, imgformat):
-		self._db.insert({"ipfs_id" : ipfs_id, "hashlink": hashlink, "txid": txid, "block" : block, "imgformat" : imgformat})
+    def add_meme(self, ipfs_id, hashlink, txid, block, imgformat):
+        self._db.insert({"ipfs_id" : ipfs_id, "hashlink": hashlink, "txid": txid, "block" : block, "imgformat" : imgformat})
 
-	def remove_meme(self, ipfs_id):
-		self._db.remove(Query().ipfs_id == ipfs_id)
+    def remove_meme(self, ipfs_id):
+        self._db.remove(Query().ipfs_id == ipfs_id)
 
-	def get_memechain_height(self):
-		return len(self._db)
+    def get_memechain_height(self):
+        return len(self._db)
 
     def search_by_block(self, block):
         """
@@ -56,21 +56,21 @@ class MemeChainDB(object):
         """
         return self._db.get(Query().block == block)
 
-	def search_by_memechain_height(self, height):
-		"""
-		Get a meme entry using height as the search parameter
+    def search_by_memechain_height(self, height):
+        """
+        Get a meme entry using height as the search parameter
 
-		height - Float (0 is genesis) 
-		"""
-		return Index(self._db)[height]
+        height - Float (0 is genesis) 
+        """
+        return Index(self._db)[height]
 
-	def search_by_ipfs_id(self, ipfs_id):
-		"""
+    def search_by_ipfs_id(self, ipfs_id):
+        """
 		Get a meme entry using its IPFS ID as the search parameter
 		
 		ipfs_id - String
 		"""
-		return self._db.get(Query().ipfs_id == ipfs_id)
+        return self._db.get(Query().ipfs_id == ipfs_id)
 
     def search_by_txid(self, txid):
         """

@@ -4,7 +4,7 @@ import falcon
 
 from lib.ipfs import IPFSTools
 from lib.db import MemeChainDB
-from lib.memechain import MemeTx, Validate
+from lib.memechain import MemeTX, Validate
 
 # Logging Code
 logger = logging.getLogger('memechain')
@@ -16,6 +16,15 @@ logger.setLevel(logging.WARNING)
 
 #logger.error('We have a problem')
 #logger.info('While this is just chatty')
+class get_test(object):
+	def on_get(self, req, resp):
+		resp.status = falcon.HTTP_200  # This is the default status
+		resp.set_header('Powered-By', 'MemeChain')
+
+		resp.body = json.dumps({
+			'success' : True,
+			'result' : 0
+			})
 
 class get_info(object):
 	def on_get(self, req, resp):
@@ -206,6 +215,9 @@ class add_authored_meme(object):
 
 # Falcon API
 app = falcon.API()
+
+# API testing command
+app.add_route('/api/gettest', get_test())
 
 # Get node info command
 app.add_route('/api/getinfo', get_info())
