@@ -1,21 +1,11 @@
-import logging, json, io, os, mimetypes, random, re
+import json, io, os, mimetypes, random, re
 
 import falcon
 
 from lib.ipfs import IPFSTools
 from lib.db import MemeChainDB
 from lib.memechain import MemeTx, Validate
-
-# Logging Code
-logger = logging.getLogger('memechain')
-hdlr = logging.FileHandler('./data/debug.log')
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-hdlr.setFormatter(formatter)
-logger.addHandler(hdlr) 
-logger.setLevel(logging.WARNING)
-
-#logger.error('We have a problem')
-#logger.info('While this is just chatty')
+from logger import *
 
 class get_info(object):
 	def on_get(self, req, resp):
@@ -107,7 +97,6 @@ class get_meme_img_by_hash(object):
 		name = '{img_name}{ext}'.format(img_name=meme_metadata["ipfs_id"], ext=meme_metadata["imgformat"]) 
 		image_path = os.path.join("./data", name)
 		
-
 		if not self._IMAGE_NAME_PATTERN.match(name):
 			# 404 Not found response
 			raise falcon.HTTPError(falcon.HTTP_404,'Database Error', "Meme not found.")

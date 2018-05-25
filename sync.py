@@ -1,12 +1,13 @@
-import logging
+from logger import *
 
-# Logging Code
-logger = logging.getLogger('memechain')
-hdlr = logging.FileHandler('./data/debug.log')
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-hdlr.setFormatter(formatter)
-logger.addHandler(hdlr) 
-logger.setLevel(logging.WARNING)
 
-#logger.error('We have a problem')
-#logger.info('While this is just chatty')
+class SyncTools():
+	"""
+	Wrapper class for various syncing functions
+	"""
+	def __init__(self):
+		pass
+
+if __name__ == '__main__':
+	# Sync logic
+	pass
