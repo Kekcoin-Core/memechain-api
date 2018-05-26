@@ -1,0 +1,6 @@
+{
+	"DATA_DIR" : "./data",
+	"RPC_USER" : "user",
+	"RPC_PASS" : "pass",
+	"RPC_PORT" : "13377"
+}
