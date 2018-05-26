@@ -218,9 +218,6 @@ class add_authored_meme(object):
 # Falcon API
 app = falcon.API()
 
-# API testing command
-app.add_route('/api/gettest', get_test())
-
 # Get node info command
 app.add_route('/api/getinfo', get_info())
 
