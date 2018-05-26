@@ -2,7 +2,7 @@
 Basic OP_RETURN data storage tool for Memechain.
 """
 from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
-import logging, sys, json
+import logging, sys, json, os
 from binascii import hexlify, unhexlify
 
 # Debug settings
@@ -12,7 +12,7 @@ if debug:
 	logging.getLogger("BitcoinRPC").setLevel(logging.DEBUG)
 
 # Load configuration file
-with open("../config.json", "r") as f:
+with open(os.path.abspath(os.path.join(__file__,"../../config.json")), "r") as f:
 	config = json.loads(f.read())
 
 # OP_RETURN configuration
@@ -23,10 +23,28 @@ MAX_OP_RETURN_BYTES = 80
 rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") % (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
 
 def get_block_height():
-	pass
+	"""
+	Method used to get block height
+
+	Returns:
+		Block height (int)
+	"""
+	return rpc.getblockcount()
 
 def get_block_txs(height):
-	pass
+	"""
+	Method used to get tx hashes from block
+
+	Args:
+		block height (int)
+
+	Returns:
+		List of transaction ids (array)
+	"""
+	block_hash = rpc.getblockhash(height)
+	block = rpc.getblock(block_hash)
+
+	return block['tx']
 
 def get_input():
 	"""
