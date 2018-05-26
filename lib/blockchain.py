@@ -22,6 +22,12 @@ MAX_OP_RETURN_BYTES = 80
 # Define RPC object
 rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") % (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
 
+def get_block_height():
+	pass
+
+def get_block_txs(height):
+	pass
+
 def get_input():
 	"""
 	Method used to get unspent inputs
