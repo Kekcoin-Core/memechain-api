@@ -18,6 +18,7 @@ class get_info(object):
 
 class get_memechain_height(object):
 	def on_get(self, req, resp):
+		logger.info('COMMAND %s Received' % self.__class__.__name__)
 		db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
 
 		height = db.get_memechain_height()
@@ -25,6 +26,7 @@ class get_memechain_height(object):
 		resp.status = falcon.HTTP_200  
 		resp.set_header('Powered-By', 'Memechain')
 
+		logger.info('COMMAND %s Success' % self.__class__.__name__)
 		resp.body = json.dumps({
 			'success' : True,
 			'result' : height
@@ -32,16 +34,19 @@ class get_memechain_height(object):
 
 class get_meme_data_by_height(object):
 	def on_get(self, req, resp, height):
+		logger.info('COMMAND %s Received' % self.__class__.__name__)
 		db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
 
 		meme_metadata = db.search_by_memechain_height(height)
 
 		if not meme_metadata:
+			logger.error('COMMAND %s Failed %s: %s' % (self.__class__.__name__, 'Database Error', "Meme not found."))
 			raise falcon.HTTPError(falcon.HTTP_404, 'Database Error', "Meme not found.")
 
 		resp.status = falcon.HTTP_200  
 		resp.set_header('Powered-By', 'Memechain')
 
+		logger.info('COMMAND %s Success' % self.__class__.__name__)
 		resp.body = json.dumps({
 			'success' : True,
 			'result' : meme_metadata
@@ -49,16 +54,19 @@ class get_meme_data_by_height(object):
 
 class get_meme_data_by_hash(object):
 	def on_get(self, req, resp, ipfs_id):
+		logger.info('COMMAND %s Received' % self.__class__.__name__)
 		db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
 
 		meme_metadata = db.search_by_ipfs_id(ipfs_id)
 
 		if not meme_metadata:
+			logger.error('COMMAND %s Failed %s: %s' % (self.__class__.__name__, 'Database Error', "Meme not found."))
 			raise falcon.HTTPError(falcon.HTTP_404, 'Database Error', "Meme not found.")
 
 		resp.status = falcon.HTTP_200  
 		resp.set_header('Powered-By', 'Memechain')
 
+		logger.info('COMMAND %s Success' % self.__class__.__name__)
 		resp.body = json.dumps({
 			'success' : True,
 			'result' : meme_metadata
@@ -67,6 +75,7 @@ class get_meme_data_by_hash(object):
 class get_meme_img_by_height(object):
 	_IMAGE_NAME_PATTERN = re.compile('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z]{2,4}$')
 	def on_get(self, req, resp, height):
+		logger.info('COMMAND %s Received' % self.__class__.__name__)
 		db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
 
 		meme_metadata = db.search_by_memechain_height(height)
@@ -78,6 +87,7 @@ class get_meme_img_by_height(object):
 
 		if not self._IMAGE_NAME_PATTERN.match(name):
 			# 404 Not found response
+			logger.error('COMMAND %s Failed %s: %s' % (self.__class__.__name__, 'Database Error', "Meme not found."))
 			raise falcon.HTTPError(falcon.HTTP_404,'Database Error', "Meme not found.")
 
 		else:
@@ -89,11 +99,14 @@ class get_meme_img_by_height(object):
 			resp.status = falcon.HTTP_200
 			resp.set_header('Powered-By', 'Memechain')
 			resp.content_type = mimetypes.guess_type(name)[0]
+
+			logger.info('COMMAND %s Success' % self.__class__.__name__)
 			resp.stream, resp.stream_len = stream, stream_len
 
 class get_meme_img_by_hash(object):
 	_IMAGE_NAME_PATTERN = re.compile('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z]{2,4}$')
 	def on_get(self, req, resp, ipfs_id):
+		logger.info('COMMAND %s Received' % self.__class__.__name__)
 		db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
 
 		meme_metadata = db.search_by_ipfs_id(ipfs_id)
@@ -104,6 +117,7 @@ class get_meme_img_by_hash(object):
 		
 		if not self._IMAGE_NAME_PATTERN.match(name):
 			# 404 Not found response
+			logger.error('COMMAND %s Failed %s: %s' % (self.__class__.__name__, 'Database Error', "Meme not found."))
 			raise falcon.HTTPError(falcon.HTTP_404,'Database Error', "Meme not found.")
 
 		else:
@@ -115,6 +129,8 @@ class get_meme_img_by_hash(object):
 			resp.status = falcon.HTTP_200
 			resp.set_header('Powered-By', 'Memechain')
 			resp.content_type = mimetypes.guess_type(name)[0]
+
+			logger.info('COMMAND %s Success' % self.__class__.__name__)
 			resp.stream, resp.stream_len = stream, stream_len
 
 class add_meme(object):
@@ -123,10 +139,12 @@ class add_meme(object):
 	
 	def validate_image_type(self, req, resp, resource, params):
 		if req.content_type not in self._ALLOWED_IMAGE_TYPES:
+			logger.error('COMMAND %s Failed %s: %s' % (self.__class__.__name__, 'Memechain Error', "Meme file extension not supported."))
 			raise falcon.HTTPError(falcon.HTTP_400, 'Memechain Error', "Meme file extension not supported.")
 
 	@falcon.before(validate_image_type)
 	def on_post(self, req, resp):
+		logger.info('COMMAND %s Received' % self.__class__.__name__)
 		db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
 
 		# Generate random placeholder img name
@@ -166,12 +184,14 @@ class add_meme(object):
 				resp.status = falcon.HTTP_201
 				resp.set_header('Powered-By', 'Memechain')
 
+				logger.info('COMMAND %s Success' % self.__class__.__name__)
 				resp.body = json.dumps({
 					'success' : True,
 					'result' : ipfs_id
 					})
 
 			else:
+				logger.error('COMMAND %s Failed %s: %s' % (self.__class__.__name__, 'Memechain Error', "Meme has not passed memechain validation."))
 				raise falcon.HTTPError(falcon.HTTP_400, "Memechain error", "Meme has not passed memechain validation.")
 
 		else:
@@ -184,6 +204,7 @@ class add_meme(object):
 			resp.status = falcon.HTTP_201
 			resp.set_header('Powered-By', 'Memechain')
 
+			logger.info('COMMAND %s Success' % self.__class__.__name__)
 			resp.body = json.dumps({
 					'success' : True,
 					'result' : ipfs_id
