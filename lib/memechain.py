@@ -10,16 +10,12 @@ class Validate(object):
     """
 
     def __init__(self, MemeTX, db, ipfs_dir, prev_block_memes):
-        is_valid = [self.check_duplicate(MemeTX.get_ipfs_id(), db),
-                    self.check_ipfs_existance(ipfs_id, ipfs_dir),
-                    self.is_valid_hash_link(prev_block_memes),
-                    self.check_cloudvision()]
+        self.is_valid = [self.check_duplicate(MemeTX.get_ipfs_id(), db),
+                         self.check_ipfs_existance(ipfs_id, ipfs_dir),
+                         self.is_valid_hash_link(prev_block_memes)]
 
-        if False not in is_valid:
+        if False not in self.is_valid:
             MemeTX.set_is_valid()
-
-    def check_cloudvision(self):
-        return False
 
     def is_valid_hash_link(self, prev_block_memes):
         """
