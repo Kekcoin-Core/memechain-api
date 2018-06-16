@@ -1,5 +1,5 @@
 import os
-import ipfsapi
+import ipfsApi as ipfsapi
 
 
 class IPFSTools(object):
