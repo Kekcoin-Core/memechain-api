@@ -8,6 +8,7 @@ class Validate(object):
     """
     Validator class for MemeChainTX object.
     """
+
     def __init__(self, MemeTX, db, ipfs_dir, prev_block_memes):
         is_valid = [self.check_duplicate(MemeTX.get_ipfs_id(), db),
                     self.check_ipfs_existance(ipfs_id, ipfs_dir),
