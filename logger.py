@@ -1,8 +1,10 @@
-import logging, os, json
+import logging
+import os
+import json
 
 # Load configuration file
 with open("config.json", "r") as f:
-	config = json.loads(f.read())
+    config = json.loads(f.read())
 
 # Logging Code
 logger = logging.getLogger('memechain')
