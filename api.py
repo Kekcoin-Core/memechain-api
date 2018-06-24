@@ -20,7 +20,6 @@ class get_info(object):
     def on_get(self, req, resp):
         pass
 
-
 class get_memechain_height(object):
     def on_get(self, req, resp):
         logger.info('COMMAND %s Received' % self.__class__.__name__)

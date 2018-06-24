@@ -1,6 +1,9 @@
 import os
-import ipfsApi as ipfsapi
 
+try:
+    import ipfsApi as ipfsapi
+except ImportError:
+    import ipfsapi
 
 class IPFSTools(object):
     def __init__(self):
