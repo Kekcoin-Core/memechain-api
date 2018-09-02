@@ -46,13 +46,13 @@ class IPFSTools(object):
             # for files and then queries the network
             self.api.get(multihash)
             res = os.system('file %s') %(str(multihash))
-            supported_filetypes =  ['PNG', 'GIF']
+            supported_filetypes =  ['PNG', 'GIF', 'JPG']
             for type in supported_filetypes:
                if type in res:
-                   ext = type
+                   ext = type.lower()
                else:
                    ext = ''
-                   print("Filetype of file with id %s was found on disk but its type is not supported")
+                   raise Exception("Filetype of file with id %s was found on disk but its type is not supported")
             if subdirectory is not None:
                 filepath = subdirectory + '/' + multihash + ext
                 os.rename(multihash, filepath)
@@ -62,7 +62,7 @@ class IPFSTools(object):
                 os.rename(multihash, filepath)
                 return filepath
         except ipfsapi.exceptions.StatusError:
-            print("Invalid multihash supplied. File could not be retrieved.")
+            raise Exception("Invalid multihash supplied. File could not be retrieved.")
             return False
 
     def cat(self, multihash):
@@ -77,7 +77,7 @@ class IPFSTools(object):
         try:
             return self.api.cat(multihash)
         except ipfsapi.exceptions.StatusError:
-            print("""Invalid multihash supplied.
+            raise Exception("""Invalid multihash supplied.
                     File contents could not be retrieved.""")
             return False
 
@@ -94,19 +94,19 @@ class IPFSTools(object):
         # actually been unpinned.
         pins = self.api.pin_ls(type='recursive')['Keys']
         if filepath not in pins.keys():
-            print("Could not find {0} to remove pin".format(filepath))
+            raise Exception("Could not find {0} to remove pin".format(filepath))
             return False
 
         try:
             self.api.pin_rm(filepath, recursive)
         except ipfsapi.exceptions.ErrorResponse:
-            print("Exception ipfsapi.exceptions.ErrorResponse thrown.")
+            raise Exception("Exception ipfsapi.exceptions.ErrorResponse thrown.")
 
         self.api.repo_gc()
 
         pins = self.api.pin_ls(type='recursive')['Keys']
         if filepath not in pins.keys():
-            print("Pin for {0} successfully removed".format(filepath))
+            # print("Pin for {0} successfully removed".format(filepath))
             return
 
     def clear_all_local_files(self):
@@ -124,7 +124,7 @@ class IPFSTools(object):
         try:
             return self.api.swarm_connect(address)
         except ipfsapi.exceptions.ErrorResponse:
-            print "Connection failure. Connection refused."
+            raise Exception("Connection failure. Connection refused.")
 
     def disconnect_from_peer(self, address):
         """
@@ -136,5 +136,5 @@ class IPFSTools(object):
         try:
             return self.api.swarm_disconnect(address)
         except ipfsapi.exceptions.ErrorResponse:
-            print("Invalid IPFS peer address provided.")
+            raise Exception("Invalid IPFS peer address provided.")
             return False
