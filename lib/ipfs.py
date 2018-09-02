@@ -45,13 +45,20 @@ class IPFSTools(object):
             # Test: IPFS docs don't specify if `get()' first looks locally
             # for files and then queries the network
             self.api.get(multihash)
+            res = os.system('file %s') %(str(multihash))
+            supported_filetypes =  ['PNG', 'GIF']
+            for type in supported_filetypes:
+               if type in res:
+                   ext = type
+               else:
+                   ext = ''
+                   print("Filetype of file with id %s was found on disk but its type is not supported")
             if subdirectory is not None:
-                # Add support for other image formats
-                filepath = subdirectory + '/' + multihash + ".jpg"
+                filepath = subdirectory + '/' + multihash + ext
                 os.rename(multihash, filepath)
                 return filepath
             elif subdirectory is None:
-                filepath = multihash + '.jpg'
+                filepath = multihash + ext
                 os.rename(multihash, filepath)
                 return filepath
         except ipfsapi.exceptions.StatusError:
