@@ -1,5 +1,7 @@
 import os
+import binascii
 from hashlib import sha256
+
 from blockchain import *
 from ipfs import IPFSTools
 
@@ -117,7 +119,9 @@ class MemeTx(object):
         if "hashlink" not in locals().keys():
             raise ValueError("Hashlink has not been generated.")
         else:
-            rawtx = create_raw_op_return_transaction(
-                self._identifier + self.ipfs_id + self.hashlink)
+            metadata = self._identifier + self.ipfs_id + self.hashlink
+            metadata_hex = binascii.hexlify(metadata)
+
+            rawtx = create_raw_op_return_transaction(metadata_hex)
             signedtx = sign_raw_transaction(rawtx)
             self.txid = send_raw_transaction(signedtx)

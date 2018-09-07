@@ -1,6 +1,7 @@
 from logger import *
 import os
 import json
+import binascii
 
 from lib.db import MemeChainDB
 from lib.blockchain import *
@@ -40,7 +41,7 @@ class MemechainParser(object):
         block_txs = get_block_txs(block_height)
 
         for txid in block_txs:
-            memetx = get_op_return_data(txid)
+            memetx = binascii.unhexlify(get_op_return_data(txid))
             self.parse_memetx(memetx, txid)
 
     def parse_memetx(self, memetx, txid):
