@@ -5,6 +5,7 @@ import json
 from lib.db import MemeChainDB
 from lib.blockchain import *
 from lib.memechain import MemeTx, Validate
+from lib.ipfs import IPFSTools
 
 # Load configuration file
 with open("config.json", "r") as f:
@@ -82,11 +83,17 @@ def sync_block(db, block):
                 prev_block_memes=prev_block_memes)
             
             if memetx.is_meme_valid():
-                # TODO: Add imgformat field here
-                db.add_meme({"ipfs_id": meme['ipfs_id'], "hashlink": meme['hashlink'],
-                                 "txid": meme['txid'], "block": block, "imgformat": ""})
+                meme_filepath = IPFSTools().get_meme(ipfs_id, config['DATA_DIR'])
+                ext = meme_filepath.split(".")[-1]
 
-                logger.info('COMMAND %s Success %s: %s' % ('Sync', 'Memechain', "Meme %s added to database." % meme['ipfs_id']))
+                if ext in ["jpg", "png", "gif"]:
+                    db.add_meme({"ipfs_id": meme['ipfs_id'], "hashlink": meme['hashlink'],
+                                     "txid": meme['txid'], "block": block, "imgformat": ext})
+
+                    logger.info('COMMAND %s Success %s: %s' % ('Sync', 'Memechain', "Meme %s added to database." % meme['ipfs_id']))
+
+                else:
+                    logger.info('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid Meme image extension %s" % ext)) 
             
             else:
                 logger.info('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid MemeTx %s" % meme['ipfs_id'])) 

@@ -54,11 +54,11 @@ class IPFSTools(object):
                    ext = ''
                    raise Exception("Filetype of file with id %s was found on disk but its type is not supported")
             if subdirectory is not None:
-                filepath = subdirectory + '/' + multihash + ext
+                filepath = "%s/%s.%s" % (subdirectory, multihash, ext)
                 os.rename(multihash, filepath)
                 return filepath
             elif subdirectory is None:
-                filepath = multihash + ext
+                filepath = "%s.%s" % (multihash, ext)
                 os.rename(multihash, filepath)
                 return filepath
         except ipfsapi.exceptions.StatusError:
