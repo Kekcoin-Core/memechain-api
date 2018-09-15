@@ -14,12 +14,12 @@ with open("config.json", "r") as f:
 class GenesisMeme(MemeTx):
     def __init__(self):
         # Genesis Meme Constants
-        self.genesis_ipfs_id = ''
-        self.genesis_kekcoin_block = 400000
-        self.genesis_txid = ''
-        self.genesis_img_format = 'png'
+        self.genesis_ipfs_id = 'Qme7cKNGn2UgvvEbFSbu8qJ1oS7FcecUyQ8jT8EXW2zoJE'
+        self.genesis_kekcoin_block = 585937
+        self.genesis_txid = '6c50161c998473d9ef4c7a5df15cb1b0593f321d36da86dd6d716c5cb51ecdde'
+        self.genesis_img_format = 'jpg'
 
-        self.ipfs_id = genesis_ipfs_id
+        self.ipfs_id = self.genesis_ipfs_id
         self.generate_genesis_hashlink()
 
 class MemechainParser(object):
