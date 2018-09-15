@@ -41,7 +41,9 @@ class MemechainParser(object):
 
         for txid in block_txs:
             memetx = get_op_return_data(txid)
-            self.parse_memetx(memetx, txid)
+            
+            if memetx:
+                self.parse_memetx(memetx, txid)
 
     def parse_memetx(self, memetx, txid):
         """
@@ -87,7 +89,7 @@ def sync_block(db, block):
                 ext = meme_filepath.split(".")[-1]
 
                 if ext in ["jpg", "png", "gif"]:
-                    db.add_meme({"ipfs_id": meme['ipfs_id'], "hashlink": meme['hashlink'],
+                    db.add_meme(**{"ipfs_id": meme['ipfs_id'], "hashlink": meme['hashlink'],
                                      "txid": meme['txid'], "block": block, "imgformat": ext})
 
                     logger.info('COMMAND %s Success %s: %s' % ('Sync', 'Memechain', "Meme %s added to database." % meme['ipfs_id']))
@@ -113,7 +115,7 @@ if __name__ == '__main__':
         genesis_meme = GenesisMeme()
 
         # Add genesis meme to database
-        db.add_meme({"ipfs_id": genesis_meme.get_ipfs_id(), "hashlink": genesis_meme.get_hashlink(),
+        db.add_meme(**{"ipfs_id": genesis_meme.get_ipfs_id(), "hashlink": genesis_meme.get_hashlink(),
                          "txid": genesis_meme.genesis_txid, "block": genesis_meme.genesis_kekcoin_block, "imgformat": genesis_meme.genesis_img_format})
 
         if genesis_meme.genesis_kekcoin_block < block_height:

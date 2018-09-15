@@ -147,5 +147,7 @@ def get_op_return_data(txid):
     for data in tx_data["vout"]:
         if data["scriptPubKey"]["asm"][:9] == "OP_RETURN":
             op_return_data = unhexlify(data["scriptPubKey"]["asm"][10:])
+        else:
+            op_return_data = None
 
     return op_return_data
