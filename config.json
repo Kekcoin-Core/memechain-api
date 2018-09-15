@@ -1,5 +1,5 @@
 {
-	"DATA_DIR" : "./data",
+	"DATA_DIR" : "root/memechain-api/data",
 	"RPC_USER" : "user",
 	"RPC_PASS" : "pass",
 	"RPC_PORT" : "13377"

@@ -15,6 +15,15 @@ from logger import *
 with open("config.json", "r") as f:
     config = json.loads(f.read())
 
+ALLOWED_IMAGE_TYPES = ('image/gif', 'image/jpeg', 'image/png')
+
+def validate_image_type(req, resp, resource, params):
+    if req.content_type not in ALLOWED_IMAGE_TYPES:
+        logger.error('COMMAND %s Failed %s: %s'
+                     % ('validate_image_type', 'Memechain Error',
+                        "Meme file extension not supported."))
+        raise falcon.HTTPError(falcon.HTTP_400, 'Memechain Error',
+                               "Meme file extension not supported.")
 
 class get_info(object):
     def on_get(self, req, resp):
@@ -157,15 +166,6 @@ class get_meme_img_by_hash(object):
 
 class add_meme(object):
     _CHUNK_SIZE_BYTES = 4096
-    _ALLOWED_IMAGE_TYPES = ('image/gif', 'image/jpeg', 'image/png')
-
-    def validate_image_type(self, req, resp, resource, params):
-        if req.content_type not in self._ALLOWED_IMAGE_TYPES:
-            logger.error('COMMAND %s Failed %s: %s'
-                         % (self.__class__.__name__, 'Memechain Error',
-                            "Meme file extension not supported."))
-            raise falcon.HTTPError(falcon.HTTP_400, 'Memechain Error',
-                                   "Meme file extension not supported.")
 
     @falcon.before(validate_image_type)
     def on_post(self, req, resp):
@@ -173,8 +173,12 @@ class add_meme(object):
         db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
 
         # Generate random placeholder img name
-        img_placeholder_name = random.random().split(".")[1]
+        img_placeholder_name = str(random.random()).split(".")[1]
+
         ext = mimetypes.guess_extension(req.content_type)
+        if ext == '.jpe':
+            ext = '.jpg'
+
         name = '{img_name}{ext}'.format(img_name=img_placeholder_name, ext=ext)
         image_path = os.path.join(config['DATA_DIR'], name)
 
@@ -188,7 +192,7 @@ class add_meme(object):
                 image_file.write(chunk)
 
         # Add image to ipfs
-        ipfs_id = IPFSTools().add_meme(imgage_path)['Hash']
+        ipfs_id = IPFSTools().add_meme(image_path)['Hash']
 
         # Rename local img file to ipfs_id for easy reference
         new_name = '{img_name}{ext}'.format(img_name=ipfs_id, ext=ext)
@@ -213,7 +217,7 @@ class add_meme(object):
                 logger.info('COMMAND %s Success' % self.__class__.__name__)
                 resp.body = json.dumps({
                     'success': True,
-                    'result': ipfs_id})
+                    'result': {'ipfs_id' : ipfs_id, 'txid' : memetx.get_txid(), 'hashlink' : memetx.get_hashlink()}})
 
             else:
                 logger.error('COMMAND %s Failed %s: %s'
@@ -222,11 +226,10 @@ class add_meme(object):
                 raise falcon.HTTPError(falcon.HTTP_400, "Memechain error",
                                        "Meme has not passed " +
                                        " validation.")
-
         else:
             # Genesis block logic
             memetx = MemeTx(ipfs_id)
-            meme.generate_genesis_hashlink()
+            memetx.generate_genesis_hashlink()
 
             memetx.blockchain_write()
 
@@ -236,12 +239,7 @@ class add_meme(object):
             logger.info('COMMAND %s Success' % self.__class__.__name__)
             resp.body = json.dumps({
                 'success': True,
-                'result': ipfs_id})
-
-
-class add_authored_meme(object):
-    def on_post(self, req, resp):
-        pass
+                'result': {'ipfs_id' : ipfs_id, 'txid' : memetx.get_txid(), 'hashlink' : memetx.get_hashlink()}})
 
 
 # Falcon API
@@ -267,9 +265,6 @@ app.add_route('/api/getmemeimgbyhash/{ipfs_id}', get_meme_img_by_hash())
 
 # Add meme command
 app.add_route('/api/addmeme', add_meme())
-
-# Add authored meme command
-app.add_route('/api/addauthoredmeme', add_authored_meme())
 
 
 # For development purposes only
