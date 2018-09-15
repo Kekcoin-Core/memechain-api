@@ -57,7 +57,7 @@ class MemeChainDB(object):
 
         block - Int
         """
-        return self._db.get(Query().block == block)
+        return self._db.search(Query().block == block)
 
     def search_by_memechain_height(self, height):
         """
@@ -98,4 +98,4 @@ class MemeChainDB(object):
         else:
             last_meme = self.search_by_memechain_height(memechain_height)
 
-            return self._db.get(Query().block == last_meme["block"])
+            return self._db.search(Query().block == last_meme["block"])

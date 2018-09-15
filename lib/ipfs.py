@@ -45,11 +45,11 @@ class IPFSTools(object):
             # Test: IPFS docs don't specify if `get()' first looks locally
             # for files and then queries the network
             self.api.get(multihash)
-            res = os.system('file %s') %(str(multihash))
+            res = os.system('file %s' % str(multihash)) 
             supported_filetypes =  ['PNG', 'GIF', 'JPG']
-            for type in supported_filetypes:
-               if type in res:
-                   ext = type.lower()
+            for etype in supported_filetypes:
+               if etype in res:
+                   ext = etype.lower()
                else:
                    ext = ''
                    raise Exception("Filetype of file with id %s was found on disk but its type is not supported")
