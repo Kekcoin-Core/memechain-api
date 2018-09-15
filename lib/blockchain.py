@@ -20,7 +20,7 @@ with open(os.path.abspath(os.path.join(__file__, "../../config.json")), "r") as 
 
 # OP_RETURN configuration
 TX_FEE_AMOUNT = 0.0001
-MAX_OP_RETURN_BYTES = 80
+MAX_OP_RETURN_BYTES = 500
 
 # Define RPC object
 rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
