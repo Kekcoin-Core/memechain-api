@@ -9,7 +9,7 @@ import os
 from binascii import hexlify, unhexlify
 
 # Debug settings
-debug = True
+debug = False
 if debug:
     logging.basicConfig()
     logging.getLogger("BitcoinRPC").setLevel(logging.DEBUG)
