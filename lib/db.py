@@ -99,3 +99,6 @@ class MemeChainDB(object):
             last_meme = self.search_by_memechain_height(memechain_height)
 
             return self._db.search(Query().block == last_meme["block"])
+
+    def get_last_meme(self):
+        return Index(self._db)[-1]

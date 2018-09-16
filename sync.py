@@ -37,7 +37,7 @@ class MemechainParser(object):
         Method used to parse the op_return data
         for the transactions in the block
         """
-        block_txs = get_block_txs(block_height)
+        block_txs = get_block_txs(self.block_height)
 
         for txid in block_txs:
             memetx = get_op_return_data(txid)
@@ -85,7 +85,7 @@ def sync_block(db, block):
                 prev_block_memes=prev_block_memes)
             
             if memetx.is_meme_valid():
-                meme_filepath = IPFSTools().get_meme(ipfs_id, config['DATA_DIR'])
+                meme_filepath = IPFSTools().get_meme(meme['ipfs_id'], config['DATA_DIR'])
                 ext = meme_filepath.split(".")[-1]
 
                 if ext in ["jpg", "png", "gif"]:
@@ -126,7 +126,7 @@ if __name__ == '__main__':
             logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Blockchain Error', "Kekcoin blockchain syncing..."))
 
     else:
-        last_meme = db.search_by_memechain_height(-1)
+        last_meme = db.get_last_meme()
 
         if last_meme['block'] < block_height:
             for block in range(last_meme['block'], block_height):

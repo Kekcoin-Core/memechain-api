@@ -1,4 +1,4 @@
-import os
+import os, subprocess
 
 try:
     import ipfsApi as ipfsapi
@@ -45,25 +45,31 @@ class IPFSTools(object):
             # Test: IPFS docs don't specify if `get()' first looks locally
             # for files and then queries the network
             self.api.get(multihash)
-            res = os.system('file %s' % str(multihash)) 
-            supported_filetypes =  ['PNG', 'GIF', 'JPG']
-            for etype in supported_filetypes:
-               if etype in res:
-                   ext = etype.lower()
-               else:
-                   ext = ''
-                   raise Exception("Filetype of file with id %s was found on disk but its type is not supported")
+            
+            res =  subprocess.check_output(["file", multihash]).split(" ")[1]
+            supported_filetypes =  ['PNG', 'GIF', 'JPG', 'JPEG']
+
+            if res in supported_filetypes:
+                if res == "JPEG":
+                    ext = 'jpg'
+                else:
+                    ext = res.lower()
+            else:
+               ext = ''
+               raise Exception("Filetype of file with id %s was found on disk but its type is not supported")
+
             if subdirectory is not None:
                 filepath = "%s/%s.%s" % (subdirectory, multihash, ext)
                 os.rename(multihash, filepath)
                 return filepath
+            
             elif subdirectory is None:
                 filepath = "%s.%s" % (multihash, ext)
                 os.rename(multihash, filepath)
                 return filepath
+       
         except ipfsapi.exceptions.StatusError:
             raise Exception("Invalid multihash supplied. File could not be retrieved.")
-            return False
 
     def cat(self, multihash):
         """

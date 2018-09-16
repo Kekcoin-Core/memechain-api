@@ -90,7 +90,7 @@ def create_raw_op_return_transaction(metadata):
     input_tx = get_input()
 
     init_raw_tx = rpc.createrawtransaction([{"txid": input_tx["txid"], "vout": input_tx["vout"]}], {
-                                           input_tx["address"]: 0.1 * TX_FEE_AMOUNT, rpc.getnewaddress(): float(input_tx["amount"]) - 1.1 * TX_FEE_AMOUNT})
+                                           input_tx["address"]: float(input_tx["amount"]) - TX_FEE_AMOUNT, rpc.getnewaddress(): 0.1 * TX_FEE_AMOUNT})
 
     oldScriptPubKey = init_raw_tx[len(init_raw_tx) - 60:len(init_raw_tx) - 8]
     newScriptPubKey = "6a" + hexlify(chr(len(metadata))) + hexlify(metadata)

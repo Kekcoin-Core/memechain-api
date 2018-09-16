@@ -200,8 +200,7 @@ class add_meme(object):
                              % (self.__class__.__name__, 'Memechain Error',
                                 "Meme has not passed memechain validation."))
                 raise falcon.HTTPError(falcon.HTTP_400, "Memechain error",
-                                       "Meme has not passed " +
-                                       " validation.")
+                                       "Meme has not passed validation.")
         else:
             # Genesis block logic
             memetx = MemeTx(ipfs_id)
