@@ -68,7 +68,10 @@ class MemeChainDB(object):
         if int(height) == 0:
             return None
         else:
-            return Index(self._db)[int(height) - 1]
+            if int(height) > self.get_memechain_height():
+                return None
+            else:
+                return Index(self._db)[int(height) - 1]
 
     def search_by_ipfs_id(self, ipfs_id):
         """
