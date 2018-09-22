@@ -218,7 +218,7 @@ class add_meme(object):
 
 
 # Falcon API
-app = falcon.API()
+app = application = falcon.API()
 
 # Get node info command
 app.add_route('/api/getinfo', get_info())
