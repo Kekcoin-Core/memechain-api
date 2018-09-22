@@ -19,7 +19,7 @@ with open(os.path.abspath(os.path.join(__file__, "../../config.json")), "r") as 
     config = json.loads(f.read())
 
 # OP_RETURN configuration
-TX_FEE_AMOUNT = 0.0001
+TX_BURN_AMOUNT = 0.001 # Amount of KEKs to be burned in MemeTX
 MAX_OP_RETURN_BYTES = 500
 
 # Define RPC object
@@ -63,7 +63,7 @@ def get_input():
     unspent = rpc.listunspent()
 
     for tx in unspent:
-        if float(tx["amount"]) > 0.001:
+        if float(tx["amount"]) > 0.01:
             return tx
     else:
         raise Exception(
@@ -90,7 +90,7 @@ def create_raw_op_return_transaction(metadata):
     input_tx = get_input()
 
     init_raw_tx = rpc.createrawtransaction([{"txid": input_tx["txid"], "vout": input_tx["vout"]}], {
-                                           input_tx["address"]: float(input_tx["amount"]) - TX_FEE_AMOUNT, rpc.getnewaddress(): 0.1 * TX_FEE_AMOUNT})
+                                           input_tx["address"]: round(float(input_tx["amount"]) - 1.1 * TX_BURN_AMOUNT, 8), rpc.getnewaddress(): TX_BURN_AMOUNT})
 
     oldScriptPubKey = init_raw_tx[len(init_raw_tx) - 60:len(init_raw_tx) - 8]
     newScriptPubKey = "6a" + hexlify(chr(len(metadata))) + hexlify(metadata)
