@@ -47,7 +47,14 @@ Note if you want to host the Memechain API as a public HTTP endpoint for more sc
 screen -d -m -S memechain /bin/bash -c "gunicorn -b 0.0.0.0:1337 --reload api"
 ```
 
-After initializing the API you will need to ensure that the sync script is running via the blocknotify RPC configuration of Kekcoin. In order to do this place the following line as the last line in your Kekcoin RPC configuration file
+Before uploading memes ensure you have run the sync.py manually once
+
+```
+cd memechain-api/
+python sync.py
+```
+
+After initializing the API and having finished the initial sync you will need to ensure that the sync script is running via the blocknotify RPC configuration of Kekcoin. In order to do this place the following line as the last line in your Kekcoin RPC configuration file
 
 ```
 blocknotify=cd /path/to/memechain-api && python sync.py

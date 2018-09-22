@@ -12,7 +12,8 @@ class Validate(object):
 
     def __init__(self, MemeTX, db, ipfs_dir, prev_block_memes):
         self.is_valid = [self.check_ipfs_existance(MemeTX.get_ipfs_id(), ipfs_dir),
-                         self.is_valid_hash_link(MemeTX, prev_block_memes)]
+                         self.is_valid_hash_link(MemeTX, prev_block_memes),
+                         self.check_duplicate(db, MemeTX.get_ipfs_id())]
 
         if False not in self.is_valid:
             MemeTX.set_is_valid()
@@ -50,6 +51,20 @@ class Validate(object):
             else:
                 return True  # Meme already exists on global IPFS
 
+    def check_duplicate(self, db, ipfs_id):
+        """
+                Checks whether the meme represented by the MemeTX exists
+                in the local metadata database.
+                Args:
+                        db - Instance of MemeChainDB
+                        ipfs_id  - attribute of MemeTX
+        """
+        meme = db.search_by_ipfs_id(ipfs_id)
+
+        if meme:
+            return False
+        else:
+            return True
 
 class MemeTx(object):
     """
