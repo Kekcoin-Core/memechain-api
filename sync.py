@@ -129,7 +129,7 @@ if __name__ == '__main__':
         last_meme = db.get_last_meme()
 
         if last_meme['block'] < block_height:
-            for block in range(last_meme['block'] + 1, block_height):
+            for block in range(last_meme['block'] + 1, block_height + 1):
                 sync_block(db, block)
 
         else:
