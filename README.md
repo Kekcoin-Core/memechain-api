@@ -49,7 +49,78 @@ blocknotify=cd /path/to/memechain-api && python sync.py
 
 ## How to Use the Memechain API
 
-Usage instructions coming soon.
+Here we will show you how to send requests to the API via the command line. First lets install httpie
+
+```
+sudo apt install httpie
+```
+
+We refer users and developers to the API reference for more details to the various API calls. With httpie installed you can run the following commands 
+
+To find the current height of the memechain 
+
+```
+http localhost:1337/api/getheight
+```
+
+Example result:
+
+```
+{
+    "result": 2,
+    "success": true
+}
+```
+
+To upload a meme onto the Memechain
+
+```
+http POST localhost:1337/api/addmeme Content-Type:image/jpeg < /path/to/image.jpg
+```
+
+Example result:
+
+```
+{
+    "result": {
+        "hashlink": "9d1e43fa4d13a72c",
+        "ipfs_id": "QmX2TTmAyoLFsexSeVt5geRWwXM7PgusxchqMKgwwRx7W9",
+        "txid": "afe938e0fe7e0e62596f52cbafe27a28c63acdc9f2c6ab97298210b6263859d3"
+    },
+    "success": true
+}
+```
+
+To get the metadata for a particular meme using the height parameter
+
+```
+http localhost:1337/api/getmemedatabyheight/2
+```
+
+Example result:
+
+```
+{
+    "result": {
+        "block": 587045,
+        "hashlink": "220d8dda1ba25e98",
+        "imgformat": "jpg",
+        "ipfs_id": "QmZX8t34x2gUoERqDTNVqqVvNfFNhZpwaWQt9cj8Jc5mga",
+        "txid": "ceb5881bf95e6cb8a172e1baa244cf9c7949ee67919d2a602065c523d22e4813"
+    },
+    "success": true
+}
+```
+
+To get a meme from the Memechain using the IPFS ID parameter
+
+```
+http localhost:1337/api/getmemeimgbyheight/2 > /path/to/save/image.extension
+```
+
+## API Reference
+
+A detailed API reference coming soon.
 
 ## Social Channels
 
