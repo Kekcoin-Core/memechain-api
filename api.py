@@ -193,7 +193,7 @@ class add_meme(object):
                 logger.info('COMMAND %s Success' % self.__class__.__name__)
                 resp.body = json.dumps({
                     'success': True,
-                    'result': {'ipfs_id' : ipfs_id, 'txid' : memetx.get_txid(), 'hashlink' : memetx.get_hashlink()}})
+                    'result': {'ipfs_id' : ipfs_id, 'txid' : memetx.get_txid(), 'hashlink' : memetx.get_hashlink(), 'author' : memetx.get_author()}})
 
             else:
                 logger.error('COMMAND %s Failed %s: %s'
@@ -214,7 +214,7 @@ class add_meme(object):
             logger.info('COMMAND %s Success' % self.__class__.__name__)
             resp.body = json.dumps({
                 'success': True,
-                'result': {'ipfs_id' : ipfs_id, 'txid' : memetx.get_txid(), 'hashlink' : memetx.get_hashlink()}})
+                'result': {'ipfs_id' : ipfs_id, 'txid' : memetx.get_txid(), 'hashlink' : memetx.get_hashlink(), 'author' : memetx.get_author()}})
 
 
 # Falcon API

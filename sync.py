@@ -18,6 +18,7 @@ class GenesisMeme(MemeTx):
         self.genesis_ipfs_id = 'Qme7cKNGn2UgvvEbFSbu8qJ1oS7FcecUyQ8jT8EXW2zoJE'
         self.genesis_kekcoin_block = 585937
         self.genesis_txid = '6c50161c998473d9ef4c7a5df15cb1b0593f321d36da86dd6d716c5cb51ecdde'
+        self.genesis_author = 'KP84V1wwcguCDf2PZYbkaWFnhUBAHc1sNu'
         self.genesis_img_format = 'jpg'
 
         self.ipfs_id = self.genesis_ipfs_id
@@ -41,12 +42,12 @@ class MemechainParser(object):
         block_txs = get_block_txs(self.block_height)
 
         for txid in block_txs:
-            memetx = get_op_return_data(txid)
+            memetx, author = get_op_return_data(txid)
             
             if memetx:
-                self.parse_memetx(memetx, txid)
+                self.parse_memetx(memetx, txid, author)
 
-    def parse_memetx(self, memetx, txid):
+    def parse_memetx(self, memetx, txid, author):
         """
         Method used to parse the raw memetx metadata
         """
@@ -57,7 +58,8 @@ class MemechainParser(object):
             self.memetxs.append({
                 'ipfs_id': ipfs_id,
                 'hashlink': hashlink,
-                'txid' : txid
+                'txid' : txid,
+                'author' : author
             })
 
     def return_memetxs(self):
@@ -91,7 +93,7 @@ def sync_block(db, block):
 
                 if ext in ["jpg", "png", "gif"]:
                     db.add_meme(**{"ipfs_id": meme['ipfs_id'], "hashlink": meme['hashlink'],
-                                     "txid": meme['txid'], "block": block, "imgformat": ext})
+                                     "txid": meme['txid'], "author": meme['author'], "block": block, "imgformat": ext})
 
                     logger.info('COMMAND %s Success %s: %s' % ('Sync', 'Memechain', "Meme %s added to database." % meme['ipfs_id']))
 
@@ -117,7 +119,7 @@ if __name__ == '__main__':
 
         # Add genesis meme to database
         db.add_meme(**{"ipfs_id": genesis_meme.get_ipfs_id(), "hashlink": genesis_meme.get_hashlink(),
-                         "txid": genesis_meme.genesis_txid, "block": genesis_meme.genesis_kekcoin_block, "imgformat": genesis_meme.genesis_img_format})
+                         "txid": genesis_meme.genesis_txid, "author": genesis_meme.genesis_author, "block": genesis_meme.genesis_kekcoin_block, "imgformat": genesis_meme.genesis_img_format})
 
         # Sync loop
         if genesis_meme.genesis_kekcoin_block < block_height:

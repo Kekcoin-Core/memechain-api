@@ -95,6 +95,9 @@ class MemeTx(object):
     def get_txid(self):
         return self.txid
 
+    def get_author(self):
+        return self.author
+
     def get_hashlink(self):
         return self.hashlink
 
@@ -117,6 +120,6 @@ class MemeTx(object):
     def blockchain_write(self):
         metadata = self._identifier + self.ipfs_id + self.hashlink
 
-        rawtx = create_raw_op_return_transaction(metadata)
+        rawtx, self.author = create_raw_op_return_transaction(metadata)
         signedtx = sign_raw_transaction(rawtx)
         self.txid = send_raw_transaction(signedtx)

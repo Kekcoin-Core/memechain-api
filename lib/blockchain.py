@@ -79,6 +79,7 @@ def create_raw_op_return_transaction(metadata):
 
     Returns:
             Raw transaction (hex)
+            Author address (str)
     """
     if sys.getsizeof(metadata) > MAX_OP_RETURN_BYTES:
         raise Exception("Metadata size is over MAX_OP_RETURN_BYTES")
@@ -102,7 +103,7 @@ def create_raw_op_return_transaction(metadata):
 
     op_return_tx = init_raw_tx.replace(oldScriptPubKey, newScriptPubKey)
 
-    return op_return_tx
+    return op_return_tx, input_tx["address"]
 
 
 def sign_raw_transaction(tx):
@@ -140,6 +141,7 @@ def get_op_return_data(txid):
 
     Returns:
             Embedded metadata (str)
+            Author address (str)
     """
     raw_tx = rpc.getrawtransaction(txid)
     tx_data = rpc.decoderawtransaction(raw_tx)
@@ -150,4 +152,6 @@ def get_op_return_data(txid):
         else:
             op_return_data = None
 
-    return op_return_data
+    author = tx_data['vout'][0]['scriptPubKey']['addresses'][0]
+
+    return op_return_data, author

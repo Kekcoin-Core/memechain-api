@@ -41,9 +41,9 @@ class MemeChainDB(object):
     def __init__(self, db_path):
         self._db = TinyDB(db_path)
 
-    def add_meme(self, ipfs_id, hashlink, txid, block, imgformat):
+    def add_meme(self, ipfs_id, hashlink, txid, block, imgformat, author):
         self._db.insert({"ipfs_id": ipfs_id, "hashlink": hashlink,
-                         "txid": txid, "block": block, "imgformat": imgformat})
+                         "txid": txid, "block": block, "imgformat" : imgformat, "author" : author})
 
     def remove_meme(self, ipfs_id):
         self._db.remove(Query().ipfs_id == ipfs_id)
@@ -88,6 +88,14 @@ class MemeChainDB(object):
         txid - String
         """
         return self._db.get(Query().txid == txid)
+
+    def search_by_author(self, author):
+        """
+        Get a meme entry using its Kekcoin author as the search parameter
+
+        txid - String
+        """
+        return self._db.search(Query().author == author)
 
     def get_prev_block_memes(self):
         """
