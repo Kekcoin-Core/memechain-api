@@ -152,6 +152,9 @@ def get_op_return_data(txid):
         else:
             op_return_data = None
 
-    author = tx_data['vout'][0]['scriptPubKey']['addresses'][0]
-
+    try:
+        author = tx_data['vout'][0]['scriptPubKey']['addresses'][0]
+    except KeyError as e:
+        author = None 
+        
     return op_return_data, author
