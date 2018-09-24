@@ -68,7 +68,7 @@ Here we will show you how to send requests to the API via the command line. Firs
 sudo apt install httpie
 ```
 
-We refer users and developers to the API reference for more details to the various API calls. With httpie installed you can run the following commands 
+We refer users and developers to the API reference for more details to the various API calls. With httpie installed you can run the following commands.
 
 To find the current height of the memechain 
 

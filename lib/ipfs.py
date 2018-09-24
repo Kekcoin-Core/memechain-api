@@ -56,7 +56,7 @@ class IPFSTools(object):
                     ext = res.lower()
             else:
                ext = ''
-               raise Exception("Filetype of file with id %s was found on disk but its type is not supported")
+               raise Exception("Filetype of file with id %s was found on disk but its type is not supported" % str(multihash))
 
             if subdirectory is not None:
                 filepath = "%s/%s.%s" % (subdirectory, multihash, ext)
