@@ -1,6 +1,7 @@
 from logger import *
 import os
 import json
+import cPickle as pickle
 
 from lib.db import MemeChainDB
 from lib.blockchain import *
@@ -118,20 +119,31 @@ if __name__ == '__main__':
         db.add_meme(**{"ipfs_id": genesis_meme.get_ipfs_id(), "hashlink": genesis_meme.get_hashlink(),
                          "txid": genesis_meme.genesis_txid, "block": genesis_meme.genesis_kekcoin_block, "imgformat": genesis_meme.genesis_img_format})
 
+        # Sync loop
         if genesis_meme.genesis_kekcoin_block < block_height:
-            for block in range(genesis_meme.genesis_kekcoin_block + 1, block_height):
+            for block in range(genesis_meme.genesis_kekcoin_block + 1, block_height + 1):
                 sync_block(db, block)
-
         else:
             logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Blockchain Error', "Kekcoin blockchain syncing..."))
+
+        # Dump current sync height into a pickle
+        pickle.dump(block_height, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
 
     else:
-        last_meme = db.get_last_meme()
+        # Load last synced height
+        try:
+            synced_height = pickle.load(open(os.path.join(config['DATA_DIR'], 'sync.p'), 'rb'))
+        except IOError as e:
+            last_meme = db.get_last_meme()
+            synced_height = last_meme['block']
 
-        if last_meme['block'] < block_height:
-            for block in range(last_meme['block'] + 1, block_height + 1):
+        # Sync loop
+        if synced_height < block_height:
+            for block in range(synced_height + 1, block_height + 1):
                 sync_block(db, block)
-
         else:
             logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Blockchain Error', "Kekcoin blockchain syncing..."))
+
+        # Dump current sync height into a pickle
+        pickle.dump(block_height, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
 
