@@ -30,8 +30,8 @@ def get_block_height():
     Returns:
             Block height (int)
     """
-	rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
-	                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
+                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
 
     return rpc.getblockcount()
 
