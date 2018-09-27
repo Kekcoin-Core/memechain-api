@@ -22,10 +22,6 @@ with open(os.path.abspath(os.path.join(__file__, "../../config.json")), "r") as 
 TX_BURN_AMOUNT = 0.001 # Amount of KEKs to be burned in MemeTX
 MAX_OP_RETURN_BYTES = 500
 
-# Define RPC object
-rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
-                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
-
 
 def get_block_height():
     """
@@ -34,6 +30,9 @@ def get_block_height():
     Returns:
             Block height (int)
     """
+	rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
+	                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+
     return rpc.getblockcount()
 
 
@@ -47,6 +46,9 @@ def get_block_txs(height):
     Returns:
             List of transaction ids (array)
     """
+    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
+                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+
     block_hash = rpc.getblockhash(height)
     block = rpc.getblock(block_hash)
 
@@ -60,6 +62,9 @@ def get_input():
     Returns:
             Transaction object (dict)
     """
+    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
+                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+
     unspent = rpc.listunspent()
 
     for tx in unspent:
@@ -81,6 +86,9 @@ def create_raw_op_return_transaction(metadata):
             Raw transaction (hex)
             Author address (str)
     """
+    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
+                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+
     if sys.getsizeof(metadata) > MAX_OP_RETURN_BYTES:
         raise Exception("Metadata size is over MAX_OP_RETURN_BYTES")
 
@@ -116,6 +124,9 @@ def sign_raw_transaction(tx):
     Returns:
             Signed raw transaction (hex)
     """
+    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
+                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+
     return rpc.signrawtransaction(tx)["hex"]
 
 
@@ -129,6 +140,9 @@ def send_raw_transaction(tx_hex):
     Returns:
             Transaction id (str)
     """
+    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
+                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+
     return rpc.sendrawtransaction(tx_hex)
 
 
@@ -143,6 +157,9 @@ def get_op_return_data(txid):
             Embedded metadata (str)
             Author address (str)
     """
+    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
+                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+
     raw_tx = rpc.getrawtransaction(txid)
     tx_data = rpc.decoderawtransaction(raw_tx)
 
