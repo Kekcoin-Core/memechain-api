@@ -181,8 +181,16 @@ class add_meme(object):
         if prev_block_memes:
             memetx.generate_hashlink(prev_block_memes)
 
-            Validate(memetx, db=db, ipfs_dir=config['DATA_DIR'],
-                     prev_block_memes=prev_block_memes)
+            try:
+                Validate(memetx, db=db, ipfs_dir=config['DATA_DIR'],
+                         prev_block_memes=prev_block_memes)
+            
+            except TypeError as e:
+                logger.error('COMMAND %s Failed %s: %s'
+                             % (self.__class__.__name__, 'Memechain Error',
+                                "Meme has not passed memechain validation, file extension not supported."))
+                raise falcon.HTTPError(falcon.HTTP_400, "Memechain error",
+                                       "Meme has not passed validation, file extension not supported.")         
 
             if memetx.is_meme_valid():
                 memetx.blockchain_write()
