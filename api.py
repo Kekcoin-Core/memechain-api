@@ -5,16 +5,22 @@ import mimetypes
 import random
 import re
 import falcon
+import cPickle as pickle
 
 from lib.ipfs import IPFSTools
 from lib.db import MemeChainDB
 from lib.memechain import MemeTx, Validate
+from lib.blockchain import get_blockchain_info
 from logger import *
 
 # Load configuration file
 with open("config.json", "r") as f:
     config = json.loads(f.read())
 
+# Memechain API version
+MEMECHAIN_VERSION = '0.1-beta'
+
+# Memechain allowed content types
 ALLOWED_IMAGE_TYPES = ('image/gif', 'image/jpeg', 'image/png')
 
 def validate_image_type(req, resp, resource, params):
@@ -27,7 +33,26 @@ def validate_image_type(req, resp, resource, params):
 
 class get_info(object):
     def on_get(self, req, resp):
-        pass
+        logger.info('COMMAND %s Received' % self.__class__.__name__)
+        db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
+
+        blockchain_info = get_blockchain_info()
+        last_meme_info = db.get_last_meme()
+        memechain_height = db.get_memechain_height()
+        memechain_block_sync_height = pickle.load(open(os.path.join(config['DATA_DIR'], 'sync.p'), 'rb'))
+
+        resp.status = falcon.HTTP_200
+        resp.set_header('Powered-By', 'Memechain')
+
+        logger.info('COMMAND %s Success' % self.__class__.__name__)
+        resp.body = json.dumps({
+            'success': True,
+            'result': {'memechain_version' : MEMECHAIN_VERSION, 
+                       'blockchain_height' : blockchain_info['blocks'],
+                       'blockchain_balance' : float(blockchain_info['balance']),
+                       'memechain_block_sync_height' : memechain_block_sync_height,
+                       'memechain_height' : memechain_height,
+                       'last_meme_metadata' : last_meme_info}})
 
 class get_memechain_height(object):
     def on_get(self, req, resp):
@@ -166,6 +191,18 @@ class add_meme(object):
                     break
 
                 image_file.write(chunk)
+
+        # Check file size
+        meme_filesize = os.path.getsize(image_path) * 0.000001 # in MB
+
+        if meme_filesize > 10:
+            os.remove(image_path)
+            
+            logger.error('COMMAND %s Failed %s: %s'
+                         % (self.__class__.__name__, 'Upload Error',
+                            "Meme filesize too large."))
+            raise falcon.HTTPError(falcon.HTTP_400, "Upload error",
+                                   "Meme filesize too large.")
 
         # Add image to ipfs
         ipfs_id = IPFSTools().add_meme(image_path)['Hash']

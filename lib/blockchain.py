@@ -22,6 +22,17 @@ with open(os.path.abspath(os.path.join(__file__, "../../config.json")), "r") as 
 TX_BURN_AMOUNT = 0.001 # Amount of KEKs to be burned in MemeTX
 MAX_OP_RETURN_BYTES = 500
 
+def get_blockchain_info():
+    """
+    Method used to get Kekcoin blockchain info  
+
+    Returns:
+            getinfo output (dict)
+    """
+    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
+                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+
+    return rpc.getinfo()    
 
 def get_block_height():
     """

@@ -70,6 +70,36 @@ sudo apt install httpie
 
 We refer users and developers to the API reference for more details to the various API calls. With httpie installed you can run the following commands.
 
+To get information about your memechain node run
+```
+http localhost:1337/api/getinfo
+```
+
+Example result:
+
+```
+{
+    "result": {
+        "blockchain_balance": 0.98731,
+        "blockchain_height": 604005,
+        "last_meme_metadata": {
+            "author": "KP84V1wwcguCDf2PZYbkaWFnhUBAHc1sNu",
+            "block": 604000,
+            "hashlink": "068ad67230034336",
+            "imgformat": "jpg",
+            "ipfs_id": "QmRxdjrDRbUPZpxaCL51gkAAPbPvF6FQcnTBwgXSMR9bhP",
+            "txid": "d3940afe92c0c64ccf28841a1715458e411c306942445a53d100f0e6476fdae0"
+        },
+        "memechain_block_sync_height": 604005,
+        "memechain_height": 19,
+        "memechain_version": "0.1-beta"
+    },
+    "success": true
+}
+```
+
+Note: To ensure proper functionality ```memechain_block_sync_height``` and ```blockchain_height``` should be at most 1-5 blocks apart.
+
 To find the current height of the memechain 
 
 ```
