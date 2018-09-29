@@ -34,7 +34,7 @@ screen -d -m -S ipfs /bin/bash -c "ipfs daemon"
 
 ### How to Run the Memechain API
 
-Once you have installed the above python dependencies and are running both the Kekcoin and IPFS daemons you will need to run the Memechain Falcon API. To do so as a process within a screen you need to run the following commands
+Once you have installed the above python dependencies and are running both the Kekcoin and IPFS daemons you will need to run the Memechain Falcon API. You will first want to set up the necessary configuration details in the file ```config.json```. Once you have set up the config file you can run the API as a process within a screen by running the following commands
 
 ```
 cd memechain-api/
