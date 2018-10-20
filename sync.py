@@ -83,9 +83,10 @@ def sync_block(db, block):
         for meme in memetxs:
             memetx = MemeTx(meme['ipfs_id'])
             memetx.generate_hashlink(prev_block_memes)
+            memetx.txid = meme['txid']
 
             Validate(memetx, db=db, ipfs_dir=config['DATA_DIR'],
-                prev_block_memes=prev_block_memes)
+                prev_block_memes=prev_block_memes, sync=True)
             
             if memetx.is_meme_valid():
                 meme_filepath = IPFSTools().get_meme(meme['ipfs_id'], config['DATA_DIR'])
