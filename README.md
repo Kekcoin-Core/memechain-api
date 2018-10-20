@@ -13,7 +13,11 @@ Python will need to be installed on your system. To install python-pip run
 ```
 sudo apt install python-pip
 ```
+If it is already installed, it may need to be upgraded by running
 
+```
+pip install —upgrade pip
+```
 Once you have python-pip installed you will need to install the python dependencies by running
 
 ```
@@ -24,7 +28,14 @@ pip install tinydb ujson falcon ipfsapi python-bitcoinrpc
 
 There are some other dependencies that need to be installed.
 
-- The Kekcoin Core blockchain software should be running as a daemon. The repository can be found here https://github.com/Kekcoin-Core/kekcoin-segwit/. You can follow any guide on how to install and run bitcoind as a reference.
+- The Kekcoin Core blockchain software should be running as a daemon. The simplest way to get this running is to download the pre-compiled binaries here https://github.com/Kekcoin-Core/kekcoin-segwit/releases. Once downloaded, navigate to the folder containing kekcoin-linux-2.0.5.tar.gz and extract the contents with
+```
+tar -xf kekcoin-linux-2.0.5.tar.gz
+```
+Then to run the daemon, navigate into the kekcoin-linux-2.0.5 folder and run 
+```
+./kekcoind
+```
 
 - The IPFS software should also be running as a daemon. To install IPFS please follow the instructions found here https://ipfs.io/docs/install/. To initialize your IPFS node please follow https://ipfs.io/docs/getting-started/. After having installed IPFS and initialized your IPFS node you can run it as a daemon within a screen by using
 
