@@ -86,6 +86,7 @@ class MemeTx(object):
     def __init__(self, ipfs_id):
         # Identifier is first 4 letters of the SHA256 hash of KEK
         self._identifier = '3ae4'
+        self.command_bytes = '00'
         self.ipfs_id = ipfs_id
         self._is_valid = False
 
@@ -130,7 +131,7 @@ class MemeTx(object):
         self.hashlink = sha256(raw_str).hexdigest()[:16]
 
     def blockchain_write(self):
-        metadata = self._identifier + self.ipfs_id + self.hashlink
+        metadata = self._identifier + self.command_bytes + self.ipfs_id + self.hashlink
 
         rawtx, self.author = create_raw_op_return_transaction(metadata)
         signedtx = sign_raw_transaction(rawtx)
