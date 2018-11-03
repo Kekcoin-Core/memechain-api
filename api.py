@@ -92,6 +92,38 @@ class get_meme_data_by_height(object):
             'result': meme_metadata})
 
 
+class get_meme_data_by_range(object):
+    def on_get(self, req, resp, start, finish):
+        logger.info('COMMAND %s Received' % self.__class__.__name__)
+        db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
+
+        memes =[]
+        if start > finish:
+            direction = -1
+        else:
+            direction = 1
+
+        for height in range(start, finish, direction):
+            meme_metadata = db.search_by_memechain_height(height)
+
+            if not meme_metadata:
+                logger.error('COMMAND %s Failed %s: %s' % (self.__class__.__name__,
+                         'Database Error', "Meme {} not found.".format(height)))
+                raise falcon.HTTPError(falcon.HTTP_404, 'Database Error',
+                                       "Meme {} not found.".format(height))
+
+            else:
+                memes.append(meme_metadata)
+
+        resp.status = falcon.HTTP_200
+        resp.set_header('Powered-By', 'Memechain')
+
+        logger.info('COMMAND %s Success' % self.__class__.__name__)
+        resp.body = json.dumps({
+            'success': True,
+            'result': memes})
+
+
 class get_meme_data_by_hash(object):
     def on_get(self, req, resp, ipfs_id):
         logger.info('COMMAND %s Received' % self.__class__.__name__)
@@ -273,6 +305,9 @@ app.add_route('/api/getheight', get_memechain_height())
 
 # Get meme data by height command
 app.add_route('/api/getmemedatabyheight/{height}', get_meme_data_by_height())
+
+# Get meme data by range command
+app.add_route('/api/getmemedatabyheight/{start}-{finish}', get_meme_data_by_range())
 
 # Get meme data by hash command
 app.add_route('/api/getmemedatabyhash/{ipfs_id}', get_meme_data_by_hash())
