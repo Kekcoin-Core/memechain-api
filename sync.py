@@ -125,11 +125,12 @@ if __name__ == '__main__':
         if genesis_meme.genesis_kekcoin_block < block_height:
             for block in range(genesis_meme.genesis_kekcoin_block + 1, block_height + 1):
                 sync_block(db, block)
+
+            # Dump current sync height into a pickle
+            pickle.dump(block_height, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
+
         else:
             logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Blockchain Error', "Kekcoin blockchain syncing..."))
-
-        # Dump current sync height into a pickle
-        pickle.dump(block_height, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
 
     else:
         # Load last synced height
@@ -143,9 +144,10 @@ if __name__ == '__main__':
         if synced_height < block_height:
             for block in range(synced_height + 1, block_height + 1):
                 sync_block(db, block)
+
+            # Dump current sync height into a pickle
+            pickle.dump(block_height, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
+
         else:
             logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Blockchain Error', "Kekcoin blockchain syncing..."))
-
-        # Dump current sync height into a pickle
-        pickle.dump(block_height, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
 
