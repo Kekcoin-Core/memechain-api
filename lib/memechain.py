@@ -17,8 +17,7 @@ class Validate(object):
         
         if sync==True:
             self.is_valid.append(self.check_burn_amount())
-        if False not in self.is_valid:
-            MemeTX.set_is_valid()
+        MemeTX.set_is_valid(self.is_valid)
 
     def is_valid_hash_link(self, MemeTX, prev_block_memes):
         """
@@ -75,7 +74,8 @@ class Validate(object):
         burn_amount = get_tx_burn_amaount(MemeTX.get_tx_id())
         if burn_amount == TX_BURN_AMOUNT:
             return True
-        else return False
+        else:
+            return False
 
 
 class MemeTx(object):
@@ -90,11 +90,15 @@ class MemeTx(object):
         self.ipfs_id = ipfs_id
         self._is_valid = False
 
-    def set_is_valid(self):
-        self._is_valid = True
+    def set_is_valid(self, values):
+        self._is_valid = values
 
     def is_meme_valid(self):
-        return self._is_valid
+        if False not in self._is_valid:
+            return True
+        else:
+            return False
+
 
     def get_ipfs_id(self):
         return self.ipfs_id

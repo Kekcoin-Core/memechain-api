@@ -7,6 +7,7 @@ import re
 import falcon
 import cPickle as pickle
 
+from itertools import compress
 from lib.ipfs import IPFSTools
 from lib.db import MemeChainDB
 from lib.memechain import MemeTx, Validate
@@ -273,11 +274,13 @@ class add_meme(object):
                     'result': {'ipfs_id' : ipfs_id, 'txid' : memetx.get_txid(), 'hashlink' : memetx.get_hashlink(), 'author' : memetx.get_author()}})
 
             else:
+                validation_errors = list(compress(['Meme not found on IPFS. ', 'Invalid hashlink. ',
+                                                   'Duplicated meme. '], memetx_is_valid))
                 logger.error('COMMAND %s Failed %s: %s'
                              % (self.__class__.__name__, 'Memechain Error',
-                                "Meme has not passed memechain validation."))
+                                "Meme has not passed memechain validation: ").join(validation_errors))
                 raise falcon.HTTPError(falcon.HTTP_400, "Memechain error",
-                                       "Meme has not passed validation.")
+                                       "Meme has not passed validation: ".join(validation_errors))
         else:
             # Genesis block logic
             memetx = MemeTx(ipfs_id)

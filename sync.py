@@ -54,7 +54,7 @@ class MemechainParser(object):
         #identifier
         if memetx[:4] == '3ae4':
             #command bytes
-            if memmetx[4:6] =='00':
+            if memetx[4:6] =='00':
 
                 ipfs_id = memetx[6:][:len(memetx) - 4 - 16]
                 hashlink = memetx[6:][len(memetx) - 4 - 16:]
