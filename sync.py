@@ -103,6 +103,9 @@ def sync_block(db, block):
                     logger.info('COMMAND %s Success %s: %s' % ('Sync', 'Memechain', "Meme %s added to database." % meme['ipfs_id']))
 
                 else:
+                    # Delete invalid Meme
+                    os.remove(meme_filepath)
+                    
                     logger.info('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid Meme image extension %s" % ext)) 
             
             else:

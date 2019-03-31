@@ -255,6 +255,9 @@ class add_meme(object):
                          prev_block_memes=prev_block_memes)
             
             except TypeError as e:
+                # Delete invalid Meme
+                os.remove(os.path.join(config['DATA_DIR'], new_name))
+
                 logger.error('COMMAND %s Failed %s: %s'
                              % (self.__class__.__name__, 'Memechain Error',
                                 "Meme has not passed memechain validation, file extension not supported."))
@@ -273,6 +276,9 @@ class add_meme(object):
                     'result': {'ipfs_id' : ipfs_id, 'txid' : memetx.get_txid(), 'hashlink' : memetx.get_hashlink(), 'author' : memetx.get_author()}})
 
             else:
+                # Delete invalid Meme
+                os.remove(os.path.join(config['DATA_DIR'], new_name))
+                
                 logger.error('COMMAND %s Failed %s: %s'
                              % (self.__class__.__name__, 'Memechain Error',
                                 "Meme has not passed memechain validation: "))
