@@ -10,13 +10,14 @@ class Validate(object):
     Validator class for MemeChainTX object.
     """
 
-    def __init__(self, MemeTX, db, ipfs_dir, prev_block_memes, sync=False):
+    def __init__(self, MemeTX, db, ipfs_dir, prev_block_memes, sync = False):
         self.is_valid = [self.check_ipfs_existance(MemeTX.get_ipfs_id(), ipfs_dir),
                          self.is_valid_hash_link(MemeTX, prev_block_memes),
                          self.check_duplicate(db, MemeTX.get_ipfs_id())]
         
-        if sync==True:
+        if sync == True:
             self.is_valid.append(self.check_burn_amount())
+
         MemeTX.set_is_valid(self.is_valid)
 
     def is_valid_hash_link(self, MemeTX, prev_block_memes):
@@ -69,10 +70,11 @@ class Validate(object):
     
     def check_burn_amount(self):
         """
-                Checks whether the correct amount of KEKs was burned for the MemeTx.
+                Checks whether the correct amount of KEKs were burned for the MemeTx.
         """
-        burn_amount = get_tx_burn_amaount(MemeTX.get_tx_id())
-        if burn_amount == TX_BURN_AMOUNT:
+        burn_amount = get_tx_burn_amount(MemeTX.get_tx_id())
+
+        if float(burn_amount) == TX_BURN_AMOUNT:
             return True
         else:
             return False
@@ -98,7 +100,6 @@ class MemeTx(object):
             return True
         else:
             return False
-
 
     def get_ipfs_id(self):
         return self.ipfs_id

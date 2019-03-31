@@ -51,13 +51,13 @@ class MemechainParser(object):
         """
         Method used to parse the raw memetx metadata
         """
-        #identifier
+        # Identifier
         if memetx[:4] == '3ae4':
-            #command bytes
+            # Command bytes
             if memetx[4:6] =='00':
 
-                ipfs_id = memetx[6:][:len(memetx) - 4 - 16]
-                hashlink = memetx[6:][len(memetx) - 4 - 16:]
+                ipfs_id = memetx[6:][:len(memetx) - 6 - 16]
+                hashlink = memetx[6:][len(memetx) - 6 - 16:]
 
                 self.memetxs.append({
                     'ipfs_id': ipfs_id,
