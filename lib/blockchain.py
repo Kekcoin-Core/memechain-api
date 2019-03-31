@@ -19,7 +19,7 @@ with open(os.path.abspath(os.path.join(__file__, "../../config.json")), "r") as 
     config = json.loads(f.read())
 
 # OP_RETURN configuration
-TX_BURN_AMOUNT = 0.001 # Amount of KEKs to be burned in MemeTX
+TX_BURN_AMOUNT = 0.1 # Amount of KEKs to be burned in MemeTX
 MAX_OP_RETURN_BYTES = 500
 
 def get_blockchain_info():
