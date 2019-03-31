@@ -51,16 +51,20 @@ class MemechainParser(object):
         """
         Method used to parse the raw memetx metadata
         """
+        #identifier
         if memetx[:4] == '3ae4':
-            ipfs_id = memetx[4:][:len(memetx) - 4 - 16]
-            hashlink = memetx[4:][len(memetx) - 4 - 16:]
+            #command bytes
+            if memetx[4:6] =='00':
 
-            self.memetxs.append({
-                'ipfs_id': ipfs_id,
-                'hashlink': hashlink,
-                'txid' : txid,
-                'author' : author
-            })
+                ipfs_id = memetx[6:][:len(memetx) - 4 - 16]
+                hashlink = memetx[6:][len(memetx) - 4 - 16:]
+
+                self.memetxs.append({
+                    'ipfs_id': ipfs_id,
+                    'hashlink': hashlink,
+                    'txid' : txid,
+                    'author' : author
+                })
 
     def return_memetxs(self):
         """
@@ -83,9 +87,10 @@ def sync_block(db, block):
         for meme in memetxs:
             memetx = MemeTx(meme['ipfs_id'])
             memetx.generate_hashlink(prev_block_memes)
+            memetx.txid = meme['txid']
 
             Validate(memetx, db=db, ipfs_dir=config['DATA_DIR'],
-                prev_block_memes=prev_block_memes)
+                prev_block_memes=prev_block_memes, sync=True)
             
             if memetx.is_meme_valid():
                 meme_filepath = IPFSTools().get_meme(meme['ipfs_id'], config['DATA_DIR'])

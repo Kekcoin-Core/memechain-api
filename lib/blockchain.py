@@ -186,3 +186,23 @@ def get_op_return_data(txid):
         author = None 
         
     return op_return_data, author
+
+def get_tx_burn_amount(txid):
+    """
+    Method used to get burn output amount for transactions (for op_return transactions)
+
+    Args:
+        Transaction id (str)
+
+    Returns: 
+        Sum of input values, i.e. burn amount (float) 
+    """
+    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
+                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+
+    raw_tx = rpc.getrawtransaction(txid)
+    tx_data = rpc.decoderawtransaction(raw_tx)
+
+    for data in tx_data["vout"]:
+        if data["scriptPubKey"]["asm"][:9] == "OP_RETURN":
+            return data['value']
