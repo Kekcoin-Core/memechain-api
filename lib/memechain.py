@@ -16,7 +16,7 @@ class Validate(object):
                          self.check_duplicate(db, MemeTX.get_ipfs_id())]
         
         if sync == True:
-            self.is_valid.append(self.check_burn_amount())
+            self.is_valid.append(self.check_burn_amount(MemeTX))
 
         MemeTX.set_is_valid(self.is_valid)
 
@@ -68,11 +68,11 @@ class Validate(object):
         else:
             return True
     
-    def check_burn_amount(self):
+    def check_burn_amount(self, MemeTX):
         """
                 Checks whether the correct amount of KEKs were burned for the MemeTx.
         """
-        burn_amount = get_tx_burn_amount(MemeTX.get_tx_id())
+        burn_amount = get_tx_burn_amount(MemeTX.get_txid())
 
         if float(burn_amount) == TX_BURN_AMOUNT:
             return True
