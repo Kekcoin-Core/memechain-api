@@ -21,7 +21,7 @@ pip install —upgrade pip
 Once you have python-pip installed you will need to install the python dependencies by running
 
 ```
-pip install tinydb ujson falcon ipfsapi python-bitcoinrpc
+pip install tinydb ujson falcon ipfsapi python-bitcoinrpc gunicorn
 ```
 
 ### Other Dependencies
@@ -49,12 +49,6 @@ Once you have installed the above python dependencies and are running both the K
 
 ```
 cd memechain-api/
-screen -d -m -S memechain /bin/bash -c "python api.py"
-```
-
-Note if you want to host the Memechain API as a public HTTP endpoint for more scalable applications make sure you have gunicorn installed with ```pip install gunicorn``` and replace the last line above with
-
-```
 screen -d -m -S memechain /bin/bash -c "gunicorn -b 0.0.0.0:1337 --reload api"
 ```
 

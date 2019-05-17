@@ -278,7 +278,7 @@ class add_meme(object):
             else:
                 # Delete invalid Meme
                 os.remove(os.path.join(config['DATA_DIR'], new_name))
-                
+
                 logger.error('COMMAND %s Failed %s: %s'
                              % (self.__class__.__name__, 'Memechain Error',
                                 "Meme has not passed memechain validation: "))
@@ -326,12 +326,3 @@ app.add_route('/api/getmemeimgbyhash/{ipfs_id}', get_meme_img_by_hash())
 
 # Add meme command
 app.add_route('/api/addmeme', add_meme())
-
-
-# For development purposes only
-if __name__ == '__main__':
-    from wsgiref import simple_server
-
-    httpd = simple_server.make_server('127.0.0.1', 1337, app)
-    print("Running Memechain dev server...")
-    httpd.serve_forever()
