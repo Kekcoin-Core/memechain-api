@@ -106,10 +106,10 @@ def sync_block(db, block):
                     # Delete invalid Meme
                     os.remove(meme_filepath)
                     
-                    logger.info('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid Meme image extension %s" % ext)) 
+                    logger.info('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid Meme image extension %s." % ext)) 
             
             else:
-                logger.info('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid MemeTx %s" % meme['ipfs_id'])) 
+                logger.info('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid MemeTx %s." % meme['ipfs_id'])) 
 
     else:
         logger.info('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "No Meme TXs found in block %s." % block))
@@ -132,7 +132,10 @@ if __name__ == '__main__':
         # Sync loop
         if genesis_meme.genesis_kekcoin_block < block_height:
             for block in range(genesis_meme.genesis_kekcoin_block + 1, block_height + 1):
-                sync_block(db, block)
+                try:
+                    sync_block(db, block)
+                except IOError as e:
+                    logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid ipfs multihash."))
 
             # Dump current sync height into a pickle
             pickle.dump(block_height, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
@@ -151,7 +154,10 @@ if __name__ == '__main__':
         # Sync loop
         if synced_height < block_height:
             for block in range(synced_height + 1, block_height + 1):
-                sync_block(db, block)
+                try:
+                    sync_block(db, block)
+                except IOError as e:
+                    logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid ipfs multihash."))
 
             # Dump current sync height into a pickle
             pickle.dump(block_height, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
