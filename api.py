@@ -103,7 +103,7 @@ class get_meme_data_by_range(object):
         else:
             direction = 1
 
-        for height in range(start, finish, direction):
+        for height in range(int(start), int(finish) + 1, direction):
             meme_metadata = db.search_by_memechain_height(height)
 
             if not meme_metadata:
@@ -313,7 +313,7 @@ app.add_route('/api/getheight', get_memechain_height())
 app.add_route('/api/getmemedatabyheight/{height}', get_meme_data_by_height())
 
 # Get meme data by range command
-app.add_route('/api/getmemedatabyheight/{start}-{finish}', get_meme_data_by_range())
+app.add_route('/api/getmemedatabyheightrange/{start}-{finish}', get_meme_data_by_range())
 
 # Get meme data by hash command
 app.add_route('/api/getmemedatabyhash/{ipfs_id}', get_meme_data_by_hash())
