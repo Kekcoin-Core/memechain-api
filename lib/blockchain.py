@@ -19,7 +19,7 @@ with open(os.path.abspath(os.path.join(__file__, "../../config.json")), "r") as 
     config = json.loads(f.read())
 
 # OP_RETURN configuration
-TX_BURN_AMOUNT = 0.001 # Amount of KEKs to be burned in MemeTX
+TX_BURN_AMOUNT = 0.01 # Amount of KEKs to be burned in MemeTX
 MAX_OP_RETURN_BYTES = 500
 
 def get_blockchain_info():
@@ -186,3 +186,23 @@ def get_op_return_data(txid):
         author = None 
         
     return op_return_data, author
+
+def get_tx_burn_amount(txid):
+    """
+    Method used to get burn output amount for transactions (for op_return transactions)
+
+    Args:
+        Transaction id (str)
+
+    Returns: 
+        Sum of input values, i.e. burn amount (float) 
+    """
+    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
+                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+
+    raw_tx = rpc.getrawtransaction(txid)
+    tx_data = rpc.decoderawtransaction(raw_tx)
+
+    for data in tx_data["vout"]:
+        if data["scriptPubKey"]["asm"][:9] == "OP_RETURN":
+            return data['value']

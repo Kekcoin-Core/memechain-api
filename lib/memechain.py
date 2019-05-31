@@ -10,13 +10,15 @@ class Validate(object):
     Validator class for MemeChainTX object.
     """
 
-    def __init__(self, MemeTX, db, ipfs_dir, prev_block_memes):
+    def __init__(self, MemeTX, db, ipfs_dir, prev_block_memes, sync = False):
         self.is_valid = [self.check_ipfs_existance(MemeTX.get_ipfs_id(), ipfs_dir),
                          self.is_valid_hash_link(MemeTX, prev_block_memes),
                          self.check_duplicate(db, MemeTX.get_ipfs_id())]
+        
+        if sync == True:
+            self.is_valid.append(self.check_burn_amount(MemeTX))
 
-        if False not in self.is_valid:
-            MemeTX.set_is_valid()
+        MemeTX.set_is_valid(self.is_valid)
 
     def is_valid_hash_link(self, MemeTX, prev_block_memes):
         """
@@ -65,6 +67,18 @@ class Validate(object):
             return False
         else:
             return True
+    
+    def check_burn_amount(self, MemeTX):
+        """
+                Checks whether the correct amount of KEKs were burned for the MemeTx.
+        """
+        burn_amount = get_tx_burn_amount(MemeTX.get_txid())
+
+        if float(burn_amount) == TX_BURN_AMOUNT:
+            return True
+        else:
+            return False
+
 
 class MemeTx(object):
     """
@@ -74,14 +88,18 @@ class MemeTx(object):
     def __init__(self, ipfs_id):
         # Identifier is first 4 letters of the SHA256 hash of KEK
         self._identifier = '3ae4'
+        self.command_bytes = '00'
         self.ipfs_id = ipfs_id
         self._is_valid = False
 
-    def set_is_valid(self):
-        self._is_valid = True
+    def set_is_valid(self, values):
+        self._is_valid = values
 
     def is_meme_valid(self):
-        return self._is_valid
+        if False not in self._is_valid:
+            return True
+        else:
+            return False
 
     def get_ipfs_id(self):
         return self.ipfs_id
@@ -118,7 +136,7 @@ class MemeTx(object):
         self.hashlink = sha256(raw_str).hexdigest()[:16]
 
     def blockchain_write(self):
-        metadata = self._identifier + self.ipfs_id + self.hashlink
+        metadata = self._identifier + self.command_bytes + self.ipfs_id + self.hashlink
 
         rawtx, self.author = create_raw_op_return_transaction(metadata)
         signedtx = sign_raw_transaction(rawtx)

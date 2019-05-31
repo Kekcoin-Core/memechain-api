@@ -18,7 +18,7 @@ with open("config.json", "r") as f:
     config = json.loads(f.read())
 
 # Memechain API version
-MEMECHAIN_VERSION = '0.1-beta'
+MEMECHAIN_VERSION = '1.0.0'
 
 # Memechain allowed content types
 ALLOWED_IMAGE_TYPES = ('image/gif', 'image/jpeg', 'image/png')
@@ -90,6 +90,38 @@ class get_meme_data_by_height(object):
         resp.body = json.dumps({
             'success': True,
             'result': meme_metadata})
+
+
+class get_meme_data_by_range(object):
+    def on_get(self, req, resp, start, finish):
+        logger.info('COMMAND %s Received' % self.__class__.__name__)
+        db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
+
+        memes =[]
+        if start > finish:
+            direction = -1
+        else:
+            direction = 1
+
+        for height in range(int(start), int(finish) + 1, direction):
+            meme_metadata = db.search_by_memechain_height(height)
+
+            if not meme_metadata:
+                logger.error('COMMAND %s Failed %s: %s' % (self.__class__.__name__,
+                         'Database Error', "Meme {} not found.".format(height)))
+                raise falcon.HTTPError(falcon.HTTP_404, 'Database Error',
+                                       "Meme {} not found.".format(height))
+
+            else:
+                memes.append(meme_metadata)
+
+        resp.status = falcon.HTTP_200
+        resp.set_header('Powered-By', 'Memechain')
+
+        logger.info('COMMAND %s Success' % self.__class__.__name__)
+        resp.body = json.dumps({
+            'success': True,
+            'result': memes})
 
 
 class get_meme_data_by_hash(object):
@@ -223,6 +255,9 @@ class add_meme(object):
                          prev_block_memes=prev_block_memes)
             
             except TypeError as e:
+                # Delete invalid Meme
+                os.remove(os.path.join(config['DATA_DIR'], new_name))
+
                 logger.error('COMMAND %s Failed %s: %s'
                              % (self.__class__.__name__, 'Memechain Error',
                                 "Meme has not passed memechain validation, file extension not supported."))
@@ -241,11 +276,14 @@ class add_meme(object):
                     'result': {'ipfs_id' : ipfs_id, 'txid' : memetx.get_txid(), 'hashlink' : memetx.get_hashlink(), 'author' : memetx.get_author()}})
 
             else:
+                # Delete invalid Meme
+                os.remove(os.path.join(config['DATA_DIR'], new_name))
+
                 logger.error('COMMAND %s Failed %s: %s'
                              % (self.__class__.__name__, 'Memechain Error',
-                                "Meme has not passed memechain validation."))
+                                "Meme has not passed memechain validation: "))
                 raise falcon.HTTPError(falcon.HTTP_400, "Memechain error",
-                                       "Meme has not passed validation.")
+                                       "Meme has not passed validation: ")
         else:
             # Genesis block logic
             memetx = MemeTx(ipfs_id)
@@ -274,6 +312,9 @@ app.add_route('/api/getheight', get_memechain_height())
 # Get meme data by height command
 app.add_route('/api/getmemedatabyheight/{height}', get_meme_data_by_height())
 
+# Get meme data by range command
+app.add_route('/api/getmemedatabyheightrange/{start}-{finish}', get_meme_data_by_range())
+
 # Get meme data by hash command
 app.add_route('/api/getmemedatabyhash/{ipfs_id}', get_meme_data_by_hash())
 
@@ -285,12 +326,3 @@ app.add_route('/api/getmemeimgbyhash/{ipfs_id}', get_meme_img_by_hash())
 
 # Add meme command
 app.add_route('/api/addmeme', add_meme())
-
-
-# For development purposes only
-if __name__ == '__main__':
-    from wsgiref import simple_server
-
-    httpd = simple_server.make_server('127.0.0.1', 1337, app)
-    print("Running Memechain dev server...")
-    httpd.serve_forever()

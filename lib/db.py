@@ -36,6 +36,8 @@ class Index(object):
     def __getitem__(self, idx):
         return self.ranked()[idx]
 
+    def return_index(self, datum):
+        return self.ranked().index(datum)
 
 class MemeChainDB(object):
     def __init__(self, db_path):
@@ -71,7 +73,7 @@ class MemeChainDB(object):
             if int(height) > self.get_memechain_height():
                 return None
             else:
-                return Index(self._db)[int(height) - 1]
+                return dict({'meme_height' : int(height)}, **Index(self._db)[int(height) - 1])
 
     def search_by_ipfs_id(self, ipfs_id):
         """
@@ -79,7 +81,7 @@ class MemeChainDB(object):
 
                 ipfs_id - String
                 """
-        return self._db.get(Query().ipfs_id == ipfs_id)
+        return dict({'meme_height' : self.get_meme_height_by_ipfs_id(ipfs_id)}, **self._db.get(Query().ipfs_id == ipfs_id))
 
     def search_by_txid(self, txid):
         """
@@ -113,3 +115,6 @@ class MemeChainDB(object):
 
     def get_last_meme(self):
         return Index(self._db)[-1]
+
+    def get_meme_height_by_ipfs_id(self, ipfs_id):
+        return Index(self._db).return_index(self._db.get(Query().ipfs_id == ipfs_id)) + 1
