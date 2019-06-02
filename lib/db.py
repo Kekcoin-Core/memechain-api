@@ -81,7 +81,10 @@ class MemeChainDB(object):
 
                 ipfs_id - String
                 """
-        return dict({'meme_height' : self.get_meme_height_by_ipfs_id(ipfs_id)}, **self._db.get(Query().ipfs_id == ipfs_id))
+        try:
+            return dict({'meme_height' : self.get_meme_height_by_ipfs_id(ipfs_id)}, **self._db.get(Query().ipfs_id == ipfs_id))
+        except ValueError as e:
+            return self._db.get(Query().ipfs_id == ipfs_id)
 
     def search_by_txid(self, txid):
         """
