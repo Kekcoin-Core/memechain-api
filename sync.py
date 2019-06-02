@@ -125,6 +125,13 @@ if __name__ == '__main__':
         # Load genesis meme
         genesis_meme = GenesisMeme()
 
+        memetx = MemeTx(genesis_meme.genesis_ipfs_id)
+        memetx.generate_genesis_hashlink()
+        memetx.txid = genesis_meme.genesis_txid
+
+        Validate(memetx, db=db, ipfs_dir=config['DATA_DIR'],
+            prev_block_memes=[], sync=True, genesis=True)
+
         # Add genesis meme to database
         db.add_meme(**{"ipfs_id": genesis_meme.get_ipfs_id(), "hashlink": genesis_meme.get_hashlink(),
                          "txid": genesis_meme.genesis_txid, "author": genesis_meme.genesis_author, "block": genesis_meme.genesis_kekcoin_block, "imgformat": genesis_meme.genesis_img_format})

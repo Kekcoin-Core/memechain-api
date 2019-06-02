@@ -10,10 +10,13 @@ class Validate(object):
     Validator class for MemeChainTX object.
     """
 
-    def __init__(self, MemeTX, db, ipfs_dir, prev_block_memes, sync = False):
-        self.is_valid = [self.check_ipfs_existance(MemeTX.get_ipfs_id(), ipfs_dir),
-                         self.is_valid_hash_link(MemeTX, prev_block_memes),
-                         self.check_duplicate(db, MemeTX.get_ipfs_id())]
+    def __init__(self, MemeTX, db, ipfs_dir, prev_block_memes, sync = False, genesis = False):
+        if genesis == False:
+            self.is_valid = [self.check_ipfs_existance(MemeTX.get_ipfs_id(), ipfs_dir),
+                             self.is_valid_hash_link(MemeTX, prev_block_memes),
+                             self.check_duplicate(db, MemeTX.get_ipfs_id())]
+        else:
+            self.is_valid = [self.check_ipfs_existance(MemeTX.get_ipfs_id(), ipfs_dir)]            
         
         if sync == True:
             self.is_valid.append(self.check_burn_amount(MemeTX))
