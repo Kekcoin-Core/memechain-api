@@ -15,10 +15,10 @@ with open("config.json", "r") as f:
 class GenesisMeme(MemeTx):
     def __init__(self):
         # Genesis Meme Constants
-        self.genesis_ipfs_id = 'Qme7cKNGn2UgvvEbFSbu8qJ1oS7FcecUyQ8jT8EXW2zoJE'
-        self.genesis_kekcoin_block = 585937
-        self.genesis_txid = '6c50161c998473d9ef4c7a5df15cb1b0593f321d36da86dd6d716c5cb51ecdde'
-        self.genesis_author = 'KP84V1wwcguCDf2PZYbkaWFnhUBAHc1sNu'
+        self.genesis_ipfs_id = 'QmUNCRjfvVts5kdxNJTQvTABE8AKPUFDyYsjqefFj2bEbG'
+        self.genesis_kekcoin_block = 947594
+        self.genesis_txid = '36ee54a262ee65ca54e41baf1298cc7f6aa1f3c6a29fb79c4ab75582ee6ec9af'
+        self.genesis_author = 'KVsKHQbuoKUgHNaFm4jZKZVHDAKPPCvwbr'
         self.genesis_img_format = 'jpg'
 
         self.ipfs_id = self.genesis_ipfs_id
