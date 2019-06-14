@@ -47,10 +47,36 @@ txindex=1
 prune=0
 maxconnections=100
 ```
-- The IPFS software should also be running as a daemon. To install IPFS please follow the instructions found here https://ipfs.io/docs/install/. To initialize your IPFS node please follow https://ipfs.io/docs/getting-started/. After having installed IPFS and initialized your IPFS node you can run it as a daemon within a screen by using
-
+- The IPFS software should also be running as a daemon. To install IPFS we recommend using ipfs-update, you can find instructions here https://docs.ipfs.io/guides/guides/install/#installing-with-ipfs-update. Once you have installed IPFS you need to initialize your IPFS node, to do this use
 ```
-screen -d -m -S ipfs /bin/bash -c "ipfs daemon"
+mkdir /data && mkdir /data/ipfs
+export IPFS_PATH=/data/ipfs
+ipfs init
+```
+After having installed IPFS and initialized your IPFS node you can run it as a daemon using supervisord. First ensure you have installed supervisor and then enter into the config file
+```
+sudo apt install supervisor
+cp /etc/supervisor/supervisord.conf /etc/supervisor/supervisord.conf.bak && nano /etc/supervisor/supervisord.conf
+```
+At the bottom of the config file enter the following
+```
+[program:ipfs]
+environment=IPFS_PATH=/data/ipfs
+command=ipfs daemon
+autorestart=true
+```
+Then enter
+```
+sudo supervisorctl reread && sudo supervisorctl update
+```
+If you want to monitor the status of IPFS you can use
+```
+sudo supervisorctl status
+```
+To start or stop the IPFS daemon you can use
+```
+sudo supervisorctl start ipfs
+sudo supervisorctl stop ipfs
 ```
 
 ### How to Run the Memechain API
