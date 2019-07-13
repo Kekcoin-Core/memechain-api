@@ -2,5 +2,6 @@
 	"DATA_DIR" : "/root/memechain-api/data",
 	"RPC_USER" : "user",
 	"RPC_PASS" : "pass",
-	"RPC_PORT" : "13377"
+	"RPC_PORT" : "13377",
+	"ALLOWED_IP_ADDRESSES" : []
 }

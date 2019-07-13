@@ -31,6 +31,15 @@ def validate_image_type(req, resp, resource, params):
         raise falcon.HTTPError(falcon.HTTP_400, 'Memechain Error',
                                "Meme file extension not supported.")
 
+def validate_ip_address(req, resp, resource, params):
+    if config["ALLOWED_IP_ADDRESSES"]:
+        if req.remote_addr not in config["ALLOWED_IP_ADDRESSES"]:
+            logger.error('COMMAND %s Failed %s: %s'
+                         % ('validate_ip_address', 'Memechain Error',
+                            "IP address not allowed."))
+            raise falcon.HTTPError(falcon.HTTP_401, 'Memechain Error',
+                                   "IP address not allowed.")
+
 class get_info(object):
     def on_get(self, req, resp):
         logger.info('COMMAND %s Received' % self.__class__.__name__)
@@ -201,6 +210,7 @@ class add_meme(object):
     _CHUNK_SIZE_BYTES = 4096
 
     @falcon.before(validate_image_type)
+    @falcon.before(validate_ip_address)
     def on_post(self, req, resp):
         logger.info('COMMAND %s Received' % self.__class__.__name__)
         db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
