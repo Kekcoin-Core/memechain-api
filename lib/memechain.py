@@ -31,7 +31,7 @@ class Validate(object):
         """
         raw_str = prev_block_memes[0]['hashlink']
         raw_str += ''.join(meme['ipfs_id'] for meme in prev_block_memes)
-        hashlink = sha256(raw_str).hexdigest()[:16]
+        hashlink = sha256(raw_str.encode('utf-8')).hexdigest()[:16]
         if hashlink != MemeTX.get_hashlink():
             return False
         else:
@@ -126,7 +126,7 @@ class MemeTx(object):
         self.hashlink = hashlink
 
     def generate_genesis_hashlink(self):
-        self.hashlink = sha256(self.ipfs_id).hexdigest()[:16]
+        self.hashlink = sha256(self.ipfs_id.encode('utf-8')).hexdigest()[:16]
 
     def generate_hashlink(self, prev_block_memes):
         """
@@ -136,7 +136,7 @@ class MemeTx(object):
         """
         raw_str = prev_block_memes[0]['hashlink']
         raw_str += ''.join(meme['ipfs_id'] for meme in prev_block_memes)
-        self.hashlink = sha256(raw_str).hexdigest()[:16]
+        self.hashlink = sha256(raw_str.encode('utf-8')).hexdigest()[:16]
 
     def blockchain_write(self):
         metadata = self._identifier + self.command_bytes + self.ipfs_id + self.hashlink

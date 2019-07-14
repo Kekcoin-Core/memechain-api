@@ -1,18 +1,15 @@
 import os, subprocess
 
-try:
-    import ipfsApi as ipfsapi
-except ImportError:
-    import ipfsapi
+import ipfshttpclient
 
 class IPFSTools(object):
     def __init__(self):
-        self.api = ipfsapi.Client('127.0.0.1', 5001)
+        self.api = ipfshttpclient.connect(session=True)
         try:
-            ipfsapi.assert_version(
+            ipfshttpclient.assert_version(
                 self.api.version()['Version'],
                 minimum='0.4.3', maximum='0.5.0')
-        except ipfsapi.exceptions.VersionMismatch:
+        except ipfshttpclient.exceptions.VersionMismatch:
             return "Please update the IPFS daemon."
 
     def add_meme(self, filepath):
@@ -21,8 +18,7 @@ class IPFSTools(object):
         # Note: Possible to recursively add all
         # memes in a directory - but not implemented.
         try:
-            with open(filepath, 'rb') as f:
-                res = self.api.add(f, False)
+            res = self.api.add(filepath)
             return res
         except IOError:
             print((
@@ -46,7 +42,7 @@ class IPFSTools(object):
             # for files and then queries the network
             self.api.get(multihash)
             
-            res =  subprocess.check_output(["file", multihash]).split(" ")[1]
+            res =  subprocess.check_output(["file", multihash]).decode().split(" ")[1]
             supported_filetypes =  ['PNG', 'GIF', 'JPG', 'JPEG']
 
             if res in supported_filetypes:
@@ -68,7 +64,7 @@ class IPFSTools(object):
                 os.rename(multihash, filepath)
                 return filepath
        
-        except ipfsapi.exceptions.StatusError:
+        except ipfshttpclient.exceptions.StatusError:
             raise IOError("Invalid multihash supplied. File could not be retrieved.")
 
     def cat(self, multihash):
@@ -82,13 +78,13 @@ class IPFSTools(object):
         """
         try:
             return self.api.cat(multihash)
-        except ipfsapi.exceptions.StatusError:
+        except ipfshttpclient.exceptions.StatusError:
             raise Exception("""Invalid multihash supplied.
                     File contents could not be retrieved.""")
             return False
 
     def clear_local_file(self, filepath, recursive=False):
-        # Todo: figure out why this raises ipfsapi.exceptions.ErrorResponse
+        # Todo: figure out why this raises ipfshttpclient.exceptions.ErrorResponse
         # but still removes pin.
 
         # These are the functions to perform:
@@ -105,8 +101,8 @@ class IPFSTools(object):
 
         try:
             self.api.pin_rm(filepath, recursive)
-        except ipfsapi.exceptions.ErrorResponse:
-            raise Exception("Exception ipfsapi.exceptions.ErrorResponse thrown.")
+        except ipfshttpclient.exceptions.ErrorResponse:
+            raise Exception("Exception ipfshttpclient.exceptions.ErrorResponse thrown.")
 
         self.api.repo_gc()
 
@@ -129,7 +125,7 @@ class IPFSTools(object):
         # Haven't successfuly connected to a peer yet?
         try:
             return self.api.swarm_connect(address)
-        except ipfsapi.exceptions.ErrorResponse:
+        except ipfshttpclient.exceptions.ErrorResponse:
             raise Exception("Connection failure. Connection refused.")
 
     def disconnect_from_peer(self, address):
@@ -141,6 +137,6 @@ class IPFSTools(object):
         """
         try:
             return self.api.swarm_disconnect(address)
-        except ipfsapi.exceptions.ErrorResponse:
+        except ipfshttpclient.exceptions.ErrorResponse:
             raise Exception("Invalid IPFS peer address provided.")
             return False
