@@ -110,7 +110,7 @@ def create_raw_op_return_transaction(metadata):
     input_tx = get_input()
 
     init_raw_tx = rpc.createrawtransaction([{"txid": input_tx["txid"], "vout": input_tx["vout"]}], {
-                                           input_tx["address"]: round(float(input_tx["amount"]) - 1.1 * TX_BURN_AMOUNT, 8), rpc.getnewaddress(): TX_BURN_AMOUNT})
+                                           input_tx["address"]: TX_BURN_AMOUNT, rpc.getnewaddress(): round(float(input_tx["amount"]) - 1.1 * TX_BURN_AMOUNT, 8)})
 
     oldScriptPubKey = init_raw_tx[len(init_raw_tx) - 60:len(init_raw_tx) - 8]
     newScriptPubKey = b"6a" + hexlify(bytes(chr(len(metadata)), encoding='utf-8')) + hexlify(bytes(metadata, encoding='utf-8'))
@@ -120,6 +120,8 @@ def create_raw_op_return_transaction(metadata):
         raise Exception("Something broke!")
 
     op_return_tx = init_raw_tx.replace(oldScriptPubKey, newScriptPubKey.decode('ascii'))
+
+    print(rpc.decoderawtransaction(op_return_tx)['vout'])
 
     return op_return_tx, input_tx["address"]
 
