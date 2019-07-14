@@ -209,8 +209,8 @@ class get_meme_img_by_hash(object):
 class add_meme(object):
     _CHUNK_SIZE_BYTES = 4096
 
-    @falcon.before(validate_image_type)
     @falcon.before(validate_ip_address)
+    @falcon.before(validate_image_type)
     def on_post(self, req, resp):
         logger.info('COMMAND %s Received' % self.__class__.__name__)
         db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
