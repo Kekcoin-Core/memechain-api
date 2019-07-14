@@ -1,8 +1,8 @@
 import os
 from hashlib import sha256
 
-from blockchain import *
-from ipfs import IPFSTools
+from .blockchain import *
+from .ipfs import IPFSTools
 
 
 class Validate(object):

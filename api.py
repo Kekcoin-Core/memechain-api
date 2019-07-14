@@ -5,7 +5,7 @@ import mimetypes
 import random
 import re
 import falcon
-import cPickle as pickle
+import pickle as pickle
 
 from lib.ipfs import IPFSTools
 from lib.db import MemeChainDB

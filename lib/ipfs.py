@@ -25,8 +25,8 @@ class IPFSTools(object):
                 res = self.api.add(f, False)
             return res
         except IOError:
-            print(
-                "File {0} does not exist and couldn't be added.".format(filepath))
+            print((
+                "File {0} does not exist and couldn't be added.".format(filepath)))
             return False
 
     def get_meme(self, multihash, subdirectory=None):
@@ -99,7 +99,7 @@ class IPFSTools(object):
         # I've added a check to see whether or not the file has
         # actually been unpinned.
         pins = self.api.pin_ls(type='recursive')['Keys']
-        if filepath not in pins.keys():
+        if filepath not in list(pins.keys()):
             raise Exception("Could not find {0} to remove pin".format(filepath))
             return False
 
@@ -111,14 +111,14 @@ class IPFSTools(object):
         self.api.repo_gc()
 
         pins = self.api.pin_ls(type='recursive')['Keys']
-        if filepath not in pins.keys():
+        if filepath not in list(pins.keys()):
             # print("Pin for {0} successfully removed".format(filepath))
             return
 
     def clear_all_local_files(self):
         # Want to clear locally stored data > remove all pins & garbage collect
         pins = self.api.pin_ls(type='recursive')['Keys']
-        for key in pins.keys():
+        for key in list(pins.keys()):
             self.api.pin_rm(path=key, recursive=True)
         return self.api.repo_gc()
 

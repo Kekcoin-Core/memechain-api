@@ -1,7 +1,7 @@
 from logger import *
 import os
 import json
-import cPickle as pickle
+import pickle as pickle
 
 from lib.db import MemeChainDB
 from lib.blockchain import *
