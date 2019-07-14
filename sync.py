@@ -143,6 +143,9 @@ if __name__ == '__main__':
                     sync_block(db, block)
                 except IOError as e:
                     logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid ipfs multihash."))
+                except KeyboardInterrupt:
+                    # Dump current sync height into a pickle
+                    pickle.dump(block, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
 
             # Dump current sync height into a pickle
             pickle.dump(block_height, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
@@ -165,6 +168,9 @@ if __name__ == '__main__':
                     sync_block(db, block)
                 except IOError as e:
                     logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid ipfs multihash."))
+                except KeyboardInterrupt:
+                    # Dump current sync height into a pickle
+                    pickle.dump(block, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
 
             # Dump current sync height into a pickle
             pickle.dump(block_height, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
