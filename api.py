@@ -18,7 +18,7 @@ with open("config.json", "r") as f:
     config = json.loads(f.read())
 
 # Memechain API version
-MEMECHAIN_VERSION = '1.0.0'
+MEMECHAIN_VERSION = '1.1.0'
 
 # Memechain allowed content types
 ALLOWED_IMAGE_TYPES = ('image/gif', 'image/jpeg', 'image/png')
