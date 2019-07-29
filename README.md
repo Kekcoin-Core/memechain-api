@@ -11,12 +11,12 @@ This installation guide will be using Linux/Unix and Python 3.5 throughout.
 Python will need to be installed on your system. To install python-pip run
 
 ```
-sudo apt install python-pip3
+sudo apt install python3-pip
 ```
 If it is already installed, it may need to be upgraded by running
 
 ```
-pip3 install —upgrade pip
+pip3 install --upgrade pip
 ```
 Once you have python-pip installed you will need to install the python dependencies by running
 
