@@ -4,24 +4,24 @@ This is the development repository for the Kekcoin MemeChain API.
 
 ## Installation
 
-This installation guide will be using Linux/Unix throughout.
+This installation guide will be using Linux/Unix and Python 3.5 throughout.
 
 ### Python Dependencies
 
 Python will need to be installed on your system. To install python-pip run
 
 ```
-sudo apt install python-pip
+sudo apt install python-pip3
 ```
 If it is already installed, it may need to be upgraded by running
 
 ```
-pip install —upgrade pip
+pip3 install —upgrade pip
 ```
 Once you have python-pip installed you will need to install the python dependencies by running
 
 ```
-pip install tinydb ujson falcon ipfsapi python-bitcoinrpc gunicorn
+pip3 install tinydb falcon ipfshttpclient python-bitcoinrpc gunicorn
 ```
 
 ### Other Dependencies
@@ -92,14 +92,14 @@ Before uploading memes ensure you have run the sync.py manually once
 
 ```
 cd memechain-api/
-python sync.py
+python3 sync.py
 ```
 Note that this may take some time to complete, the console output will be blank whilst it is processing but debug output is available at /path/to/memechain-api/data/debug.log. 
 
 After initializing the API and having finished the initial sync you will need to ensure that the sync script is running via the blocknotify RPC configuration of Kekcoin. In order to do this place the following line as the last line in your Kekcoin RPC configuration file
 
 ```
-blocknotify=cd /path/to/memechain-api && python sync.py
+blocknotify=cd /path/to/memechain-api && python3 sync.py
 ```
 
 ## How to Use the Memechain API

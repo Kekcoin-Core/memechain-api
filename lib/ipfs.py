@@ -1,18 +1,15 @@
 import os, subprocess
 
-try:
-    import ipfsApi as ipfsapi
-except ImportError:
-    import ipfsapi
+import ipfshttpclient
 
 class IPFSTools(object):
     def __init__(self):
-        self.api = ipfsapi.Client('127.0.0.1', 5001)
+        self.api = ipfshttpclient.connect(session=True)
         try:
-            ipfsapi.assert_version(
+            ipfshttpclient.assert_version(
                 self.api.version()['Version'],
                 minimum='0.4.3', maximum='0.5.0')
-        except ipfsapi.exceptions.VersionMismatch:
+        except ipfshttpclient.exceptions.VersionMismatch:
             return "Please update the IPFS daemon."
 
     def add_meme(self, filepath):
@@ -21,12 +18,11 @@ class IPFSTools(object):
         # Note: Possible to recursively add all
         # memes in a directory - but not implemented.
         try:
-            with open(filepath, 'rb') as f:
-                res = self.api.add(f, False)
+            res = self.api.add(filepath)
             return res
         except IOError:
-            print(
-                "File {0} does not exist and couldn't be added.".format(filepath))
+            print((
+                "File {0} does not exist and couldn't be added.".format(filepath)))
             return False
 
     def get_meme(self, multihash, subdirectory=None):
@@ -46,7 +42,7 @@ class IPFSTools(object):
             # for files and then queries the network
             self.api.get(multihash)
             
-            res =  subprocess.check_output(["file", multihash]).split(" ")[1]
+            res =  subprocess.check_output(["file", multihash]).decode().split(" ")[1]
             supported_filetypes =  ['PNG', 'GIF', 'JPG', 'JPEG']
 
             if res in supported_filetypes:
@@ -68,7 +64,7 @@ class IPFSTools(object):
                 os.rename(multihash, filepath)
                 return filepath
        
-        except ipfsapi.exceptions.StatusError:
+        except ipfshttpclient.exceptions.StatusError:
             raise IOError("Invalid multihash supplied. File could not be retrieved.")
 
     def cat(self, multihash):
@@ -82,13 +78,13 @@ class IPFSTools(object):
         """
         try:
             return self.api.cat(multihash)
-        except ipfsapi.exceptions.StatusError:
+        except ipfshttpclient.exceptions.StatusError:
             raise Exception("""Invalid multihash supplied.
                     File contents could not be retrieved.""")
             return False
 
     def clear_local_file(self, filepath, recursive=False):
-        # Todo: figure out why this raises ipfsapi.exceptions.ErrorResponse
+        # Todo: figure out why this raises ipfshttpclient.exceptions.ErrorResponse
         # but still removes pin.
 
         # These are the functions to perform:
@@ -99,26 +95,26 @@ class IPFSTools(object):
         # I've added a check to see whether or not the file has
         # actually been unpinned.
         pins = self.api.pin_ls(type='recursive')['Keys']
-        if filepath not in pins.keys():
+        if filepath not in list(pins.keys()):
             raise Exception("Could not find {0} to remove pin".format(filepath))
             return False
 
         try:
             self.api.pin_rm(filepath, recursive)
-        except ipfsapi.exceptions.ErrorResponse:
-            raise Exception("Exception ipfsapi.exceptions.ErrorResponse thrown.")
+        except ipfshttpclient.exceptions.ErrorResponse:
+            raise Exception("Exception ipfshttpclient.exceptions.ErrorResponse thrown.")
 
         self.api.repo_gc()
 
         pins = self.api.pin_ls(type='recursive')['Keys']
-        if filepath not in pins.keys():
+        if filepath not in list(pins.keys()):
             # print("Pin for {0} successfully removed".format(filepath))
             return
 
     def clear_all_local_files(self):
         # Want to clear locally stored data > remove all pins & garbage collect
         pins = self.api.pin_ls(type='recursive')['Keys']
-        for key in pins.keys():
+        for key in list(pins.keys()):
             self.api.pin_rm(path=key, recursive=True)
         return self.api.repo_gc()
 
@@ -129,7 +125,7 @@ class IPFSTools(object):
         # Haven't successfuly connected to a peer yet?
         try:
             return self.api.swarm_connect(address)
-        except ipfsapi.exceptions.ErrorResponse:
+        except ipfshttpclient.exceptions.ErrorResponse:
             raise Exception("Connection failure. Connection refused.")
 
     def disconnect_from_peer(self, address):
@@ -141,6 +137,6 @@ class IPFSTools(object):
         """
         try:
             return self.api.swarm_disconnect(address)
-        except ipfsapi.exceptions.ErrorResponse:
+        except ipfshttpclient.exceptions.ErrorResponse:
             raise Exception("Invalid IPFS peer address provided.")
             return False

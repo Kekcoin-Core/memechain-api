@@ -110,17 +110,18 @@ def create_raw_op_return_transaction(metadata):
     input_tx = get_input()
 
     init_raw_tx = rpc.createrawtransaction([{"txid": input_tx["txid"], "vout": input_tx["vout"]}], {
-                                           input_tx["address"]: round(float(input_tx["amount"]) - 1.1 * TX_BURN_AMOUNT, 8), rpc.getnewaddress(): TX_BURN_AMOUNT})
+                                           input_tx["address"]: TX_BURN_AMOUNT, rpc.getnewaddress(): round(float(input_tx["amount"]) - 1.1 * TX_BURN_AMOUNT, 8)})
 
     oldScriptPubKey = init_raw_tx[len(init_raw_tx) - 60:len(init_raw_tx) - 8]
-    newScriptPubKey = "6a" + hexlify(chr(len(metadata))) + hexlify(metadata)
-    newScriptPubKey = hexlify(
-        chr(len(unhexlify(newScriptPubKey)))) + newScriptPubKey
+    newScriptPubKey = b"6a" + hexlify(bytes(chr(len(metadata)), encoding='utf-8')) + hexlify(bytes(metadata, encoding='utf-8'))
+    newScriptPubKey = hexlify(bytes(chr(len(unhexlify(newScriptPubKey))), encoding='utf-8')) + newScriptPubKey
 
     if oldScriptPubKey not in init_raw_tx:
         raise Exception("Something broke!")
 
-    op_return_tx = init_raw_tx.replace(oldScriptPubKey, newScriptPubKey)
+    op_return_tx = init_raw_tx.replace(oldScriptPubKey, newScriptPubKey.decode('ascii'))
+
+    print(rpc.decoderawtransaction(op_return_tx)['vout'])
 
     return op_return_tx, input_tx["address"]
 
@@ -176,7 +177,7 @@ def get_op_return_data(txid):
 
     for data in tx_data["vout"]:
         if data["scriptPubKey"]["asm"][:9] == "OP_RETURN":
-            op_return_data = unhexlify(data["scriptPubKey"]["asm"][10:])
+            op_return_data = str(unhexlify(data["scriptPubKey"]["asm"][10:]), encoding='utf-8')
         else:
             op_return_data = None
 

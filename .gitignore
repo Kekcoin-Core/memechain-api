@@ -1,3 +1,4 @@
 
 *.pyc
 data/memechain.json
+*.bak

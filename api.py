@@ -5,7 +5,7 @@ import mimetypes
 import random
 import re
 import falcon
-import cPickle as pickle
+import pickle as pickle
 
 from lib.ipfs import IPFSTools
 from lib.db import MemeChainDB
@@ -18,7 +18,7 @@ with open("config.json", "r") as f:
     config = json.loads(f.read())
 
 # Memechain API version
-MEMECHAIN_VERSION = '1.0.0'
+MEMECHAIN_VERSION = '1.1.0'
 
 # Memechain allowed content types
 ALLOWED_IMAGE_TYPES = ('image/gif', 'image/jpeg', 'image/png')
@@ -209,8 +209,8 @@ class get_meme_img_by_hash(object):
 class add_meme(object):
     _CHUNK_SIZE_BYTES = 4096
 
-    @falcon.before(validate_image_type)
     @falcon.before(validate_ip_address)
+    @falcon.before(validate_image_type)
     def on_post(self, req, resp):
         logger.info('COMMAND %s Received' % self.__class__.__name__)
         db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
