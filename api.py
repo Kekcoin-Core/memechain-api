@@ -169,7 +169,15 @@ class get_meme_img_by_height(object):
         image_path = os.path.join(config['DATA_DIR'], name)
 
         # Open image file
-        stream = io.open(image_path, 'rb')
+        try:
+            stream = io.open(image_path, 'rb')
+        except IOError as e:
+            logger.error('COMMAND %s Failed %s: %s'
+                         % (self.__class__.__name__, 'Download Error',
+                            "Meme not found in local file system."))
+            raise falcon.HTTPError(falcon.HTTP_404, "Download error",
+                                   "Meme not found in local file system.")
+
         stream_len = os.path.getsize(image_path)
 
         # Generate image response
@@ -194,7 +202,15 @@ class get_meme_img_by_hash(object):
         image_path = os.path.join(config['DATA_DIR'], name)
 
         # Open image file
-        stream = io.open(image_path, 'rb')
+        try:
+            stream = io.open(image_path, 'rb')
+        except IOError as e:
+            logger.error('COMMAND %s Failed %s: %s'
+                         % (self.__class__.__name__, 'Download Error',
+                            "Meme not found in local file system."))
+            raise falcon.HTTPError(falcon.HTTP_404, "Download error",
+                                   "Meme not found in local file system.")
+
         stream_len = os.path.getsize(image_path)
 
         # Generate image response
@@ -248,6 +264,13 @@ class add_meme(object):
 
         # Add image to ipfs
         ipfs_id = IPFSTools().add_meme(image_path)['Hash']
+
+        if not ipfs_id:
+            logger.error('COMMAND %s Failed %s: %s'
+                         % (self.__class__.__name__, 'Memechain Error',
+                            "Meme was not able to be added on IPFS."))
+            raise falcon.HTTPError(falcon.HTTP_400, "Memechain error",
+                                   "Meme was not able to be added on IPFS.")
 
         # Rename local img file to ipfs_id for easy reference
         new_name = '{img_name}{ext}'.format(img_name=ipfs_id, ext=ext)

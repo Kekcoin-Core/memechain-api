@@ -2,6 +2,8 @@ import os, subprocess
 
 import ipfshttpclient
 
+from exceptions import InvalidExtensionError, InvalidMultihashError
+
 class IPFSTools(object):
     def __init__(self):
         self.api = ipfshttpclient.connect(session=True)
@@ -10,7 +12,7 @@ class IPFSTools(object):
                 self.api.version()['Version'],
                 minimum='0.4.3', maximum='0.5.0')
         except ipfshttpclient.exceptions.VersionMismatch:
-            return "Please update the IPFS daemon."
+            raise Exception("Please update the IPFS daemon.")
 
     def add_meme(self, filepath):
         # Note: Objects added through ipfs add
@@ -51,8 +53,8 @@ class IPFSTools(object):
                 else:
                     ext = res.lower()
             else:
-               ext = ''
-               raise TypeError("Filetype of file with id %s was found on disk but its type is not supported" % str(multihash))
+               os.remove(multihash)
+               raise InvalidExtensionError("Filetype of file with id %s was found on disk but its type is not supported" % str(multihash))
 
             if subdirectory is not None:
                 filepath = "%s/%s.%s" % (subdirectory, multihash, ext)
@@ -65,7 +67,8 @@ class IPFSTools(object):
                 return filepath
        
         except ipfshttpclient.exceptions.StatusError:
-            raise IOError("Invalid multihash supplied. File could not be retrieved.")
+            os.remove(multihash)
+            raise InvalidMultihashError("Invalid multihash supplied. File could not be retrieved.")
 
     def cat(self, multihash):
         """
