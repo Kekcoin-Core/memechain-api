@@ -2,7 +2,7 @@ import os, subprocess
 
 import ipfshttpclient
 
-from exceptions import InvalidExtensionError, InvalidMultihashError
+from .exceptions import *
 
 class IPFSTools(object):
     def __init__(self):
@@ -67,8 +67,10 @@ class IPFSTools(object):
                 return filepath
        
         except ipfshttpclient.exceptions.StatusError:
-            os.remove(multihash)
             raise InvalidMultihashError("Invalid multihash supplied. File could not be retrieved.")
+
+        except ipfshttpclient.exceptions.TimeoutError:
+        	raise InvalidDownloadError("Read timeouterror. Meme was not able to be downloaded.")
 
     def cat(self, multihash):
         """

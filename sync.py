@@ -7,7 +7,7 @@ from lib.db import MemeChainDB
 from lib.blockchain import *
 from lib.memechain import MemeTx, Validate
 from lib.ipfs import IPFSTools
-from lib.exceptions import InvalidExtensionError, InvalidMultihashError
+from lib.exceptions import *
 
 # Load configuration file
 with open("config.json", "r") as f:
@@ -149,6 +149,9 @@ if __name__ == '__main__':
                 except InvalidExtensionError as e:
                     logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Meme has not passed memechain validation, file extension not supported."))
 
+                except InvalidDownloadError as e:
+                    logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Meme was not able to be downloaded."))
+
                 except KeyboardInterrupt:
                     # Dump current sync height into a pickle
                     pickle.dump(block, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
@@ -178,6 +181,9 @@ if __name__ == '__main__':
 
                 except InvalidExtensionError as e:
                     logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Meme has not passed memechain validation, file extension not supported."))
+
+                except InvalidDownloadError as e:
+                    logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Meme was not able to be downloaded."))
 
                 except KeyboardInterrupt:
                     # Dump current sync height into a pickle
