@@ -151,11 +151,14 @@ if __name__ == '__main__':
 
                 except InvalidDownloadError as e:
                     logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Meme was not able to be downloaded."))
+                    # Dump current sync height into a pickle
+                    pickle.dump(block - 1, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
+
                     raise InvalidDownloadError("IPFS read timeouterror. Meme was not able to be downloaded.")
 
                 except KeyboardInterrupt:
                     # Dump current sync height into a pickle
-                    pickle.dump(block-1, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
+                    pickle.dump(block - 1, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
 
             # Dump current sync height into a pickle
             pickle.dump(block_height, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
@@ -185,11 +188,14 @@ if __name__ == '__main__':
 
                 except InvalidDownloadError as e:
                     logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Meme was not able to be downloaded."))
+                    # Dump current sync height into a pickle
+                    pickle.dump(block - 1, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
+
                     raise InvalidDownloadError("IPFS read timeouterror. Meme was not able to be downloaded.")
 
                 except KeyboardInterrupt:
                     # Dump current sync height into a pickle
-                    pickle.dump(block-1, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
+                    pickle.dump(block - 1, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
 
             # Dump current sync height into a pickle
             pickle.dump(block_height, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
