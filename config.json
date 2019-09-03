@@ -1,7 +1,11 @@
 {
-	"DATA_DIR" : "/root/memechain-api/data",
+	"DATA_DIR" : "/home/parallels/memechain-api/data",
 	"RPC_USER" : "user",
 	"RPC_PASS" : "pass",
 	"RPC_PORT" : "13377",
-	"ALLOWED_IP_ADDRESSES" : []
+	"ALLOWED_IP_ADDRESSES" : [],
+	"ALLOWED_IMAGE_EXTENSIONS" : ["jpg","png","gif"],
+	"ENABLE_LOG_MEMTX_NOT_FOUND" : false,
+	"MULTIPLE_SYNC_RUNNING" : false,
+	"CHECK_FILES_ON_RUNNING" : true
 }
