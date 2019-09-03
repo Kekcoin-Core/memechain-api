@@ -6,7 +6,10 @@ import random
 import re
 import falcon
 import pickle as pickle
-
+import sys
+import magic
+import psutil
+import time
 from lib.ipfs import IPFSTools
 from lib.db import MemeChainDB
 from lib.memechain import MemeTx, Validate
@@ -22,6 +25,18 @@ MEMECHAIN_VERSION = '1.1.0'
 
 # Memechain allowed content types
 ALLOWED_IMAGE_TYPES = ('image/gif', 'image/jpeg', 'image/png')
+
+
+def check_running():
+    counter = 0
+    for q in psutil.process_iter():
+        if q.name().find('sync'):
+            if len(q.cmdline())>1 and 'sync.py' in q.cmdline()[1]:
+                counter = counter + 1
+    if counter > 1:
+        return True
+    else:
+        return False
 
 def validate_image_type(req, resp, resource, params):
     if req.content_type not in ALLOWED_IMAGE_TYPES:
@@ -231,6 +246,11 @@ class add_meme(object):
         logger.info('COMMAND %s Received' % self.__class__.__name__)
         db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
 
+        while check_running():
+            time.sleep(3)
+            logger.info('Waiting for the synchronization process to complete add_meme')
+
+
         # Generate random placeholder img name
         img_placeholder_name = str(random.random()).split(".")[1]
 
@@ -238,8 +258,10 @@ class add_meme(object):
         if ext == '.jpe':
             ext = '.jpg'
 
+
         name = '{img_name}{ext}'.format(img_name=img_placeholder_name, ext=ext)
         image_path = os.path.join(config['DATA_DIR'], name)
+
 
         # Write image to local storage
         with io.open(image_path, 'wb') as image_file:
@@ -249,6 +271,12 @@ class add_meme(object):
                     break
 
                 image_file.write(chunk)
+
+
+        if magic.from_file(image_path).lower().find(mimetypes.guess_extension(req.content_type)[1:]) < 0:
+            raise falcon.HTTPBadRequest( "Memechain error",
+                                   "Meme has not passed validation, file extension is wrong.")
+
 
         # Check file size
         meme_filesize = os.path.getsize(image_path) * 0.000001 # in MB
@@ -271,18 +299,16 @@ class add_meme(object):
                             "Meme was not able to be added on IPFS."))
             raise falcon.HTTPError(falcon.HTTP_400, "Memechain error",
                                    "Meme was not able to be added on IPFS.")
-
+            
         # Rename local img file to ipfs_id for easy reference
         new_name = '{img_name}{ext}'.format(img_name=ipfs_id, ext=ext)
         os.rename(image_path, os.path.join(config['DATA_DIR'], new_name))
-
         # Add to Kekcoin chain
         memetx = MemeTx(ipfs_id)
         prev_block_memes = db.get_prev_block_memes()
 
         if prev_block_memes:
             memetx.generate_hashlink(prev_block_memes)
-
             try:
                 Validate(memetx, db=db, ipfs_dir=config['DATA_DIR'],
                          prev_block_memes=prev_block_memes)
@@ -293,13 +319,18 @@ class add_meme(object):
 
                 logger.error('COMMAND %s Failed %s: %s'
                              % (self.__class__.__name__, 'Memechain Error',
-                                "Meme has not passed memechain validation, file extension not supported."))
+                                "Meme has not passed memechain validation, file extension not supported.%s") )
                 raise falcon.HTTPError(falcon.HTTP_400, "Memechain error",
-                                       "Meme has not passed validation, file extension not supported.")         
+                                       "Meme has not passed validation, file extension not supported.%s" % e )
 
             if memetx.is_meme_valid():
+
+
                 memetx.blockchain_write()
 
+                db.add_meme(**{"ipfs_id": ipfs_id, "hashlink": memetx.get_hashlink(),
+                               "txid": memetx.get_txid(), "author": memetx.get_author(), "block": 0, "imgformat": ext[1:],
+                               "status": "unconfirm"})
                 resp.status = falcon.HTTP_201
                 resp.set_header('Powered-By', 'Memechain')
 

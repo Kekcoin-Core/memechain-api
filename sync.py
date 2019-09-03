@@ -2,12 +2,15 @@ from logger import *
 import os
 import json
 import pickle as pickle
-
+import time
 from lib.db import MemeChainDB
 from lib.blockchain import *
 from lib.memechain import MemeTx, Validate
 from lib.ipfs import IPFSTools
 from lib.exceptions import *
+
+import psutil
+
 
 # Load configuration file
 with open("config.json", "r") as f:
@@ -79,7 +82,6 @@ class MemechainParser(object):
 def sync_block(db, block):
     parser = MemechainParser(block)
     parser.collect_memetxs()
-
     memetxs = parser.return_memetxs()
 
     if memetxs:
@@ -89,36 +91,72 @@ def sync_block(db, block):
             memetx = MemeTx(meme['ipfs_id'])
             memetx.generate_hashlink(prev_block_memes)
             memetx.txid = meme['txid']
-
             Validate(memetx, db=db, ipfs_dir=config['DATA_DIR'],
                 prev_block_memes=prev_block_memes, sync=True)
-            
-            if memetx.is_meme_valid():
+            valid_state = memetx.is_meme_valid()
+            if valid_state == -1:
                 meme_filepath = IPFSTools().get_meme(meme['ipfs_id'], config['DATA_DIR'])
                 ext = meme_filepath.split(".")[-1]
 
-                if ext in ["jpg", "png", "gif"]:
-                    db.add_meme(**{"ipfs_id": meme['ipfs_id'], "hashlink": meme['hashlink'],
-                                     "txid": meme['txid'], "author": meme['author'], "block": block, "imgformat": ext})
-
-                    logger.info('COMMAND %s Success %s: %s' % ('Sync', 'Memechain', "Meme %s added to database." % meme['ipfs_id']))
-
+                if db.search_by_ipfs_id(meme['ipfs_id']):
+                    db.update_meme(meme['ipfs_id'], block)
+                    logger.info('COMMAND %s Success %s: %s' % (
+                    'Sync', 'Memechain', "Meme %s update in database." % meme['ipfs_id']))
                 else:
-                    # Delete invalid Meme
-                    os.remove(meme_filepath)
-                    
-                    logger.info('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid Meme image extension %s." % ext)) 
-            
-            else:
+                    db.add_meme(**{"ipfs_id": meme['ipfs_id'], "hashlink": meme['hashlink'],
+                                     "txid": meme['txid'], "author": meme['author'], "block": block, "imgformat": ext, "status": "confirm"})
+                    logger.info('COMMAND %s Success %s: %s' % ('Sync', 'Memechain', "Meme %s added to database." % meme['ipfs_id']))
+            elif valid_state != 3:
+                meme_filepath = IPFSTools().get_meme(meme['ipfs_id'], config['DATA_DIR'])
+                os.remove(meme_filepath)
                 logger.info('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid MemeTx %s." % meme['ipfs_id'])) 
 
     else:
-        logger.info('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "No Meme TXs found in block %s." % block))
+        if config["ENABLE_LOG_MEMTX_NOT_FOUND"]:
+            logger.info('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "No Meme TXs found in block %s." % block))
+
+def check_files_status(db):
+    for file in os.listdir(config['DATA_DIR']):
+        if file.endswith(tuple(config["ALLOWED_IMAGE_EXTENSIONS"])):
+            if db.search_by_ipfs_id(file.split(".")[0]) is None:
+                os.remove(os.path.join(config['DATA_DIR'], file))
+                logger.info('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Remove file from data folder (not exist in db)  %s." % file))
+
+    for meme in db.get_all_memes():
+        if not os.path.isfile(os.path.join(config['DATA_DIR'], meme["ipfs_id"] + "." + meme["imgformat"])):
+            logger.info('COMMAND %s Failed %s: %s' % (
+            'Sync', 'Memechain', "File not  found in data folder (exist in db)  %s." % meme["ipfs_id"]))
+            ipfs = IPFSTools()
+            ipfs.get_meme(meme["ipfs_id"], config['DATA_DIR'])
+            logger.info('COMMAND %s Info %s: %s' % ('Sync', 'Memechain', "Try downloading missing file with id  %s." % meme["ipfs_id"]))
+
+
+def check_running():
+    counter = 0
+    for q in psutil.process_iter():
+        if q.name().find('sync'):
+            if len(q.cmdline())>1 and 'sync.py' in q.cmdline()[1]:
+                counter = counter + 1
+    if counter > 1:
+        return True
+    else:
+        return False
+
+
 
 if __name__ == '__main__':
     # Load database
     db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
-    
+
+
+
+    if not config["MULTIPLE_SYNC_RUNNING"] and check_running():
+        logger.info('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Sync process already running.Shutdown current sync"))
+        sys.exit(1)
+
+    if config["CHECK_FILES_ON_RUNNING"]:
+        check_files_status(db)
+
     # Check blockheight
     block_height = get_block_height()
     
@@ -129,20 +167,22 @@ if __name__ == '__main__':
         memetx = MemeTx(genesis_meme.genesis_ipfs_id)
         memetx.generate_genesis_hashlink()
         memetx.txid = genesis_meme.genesis_txid
-
+      
         Validate(memetx, db=db, ipfs_dir=config['DATA_DIR'],
             prev_block_memes=[], sync=True, genesis=True)
-
         # Add genesis meme to database
+
+
         db.add_meme(**{"ipfs_id": genesis_meme.get_ipfs_id(), "hashlink": genesis_meme.get_hashlink(),
-                         "txid": genesis_meme.genesis_txid, "author": genesis_meme.genesis_author, "block": genesis_meme.genesis_kekcoin_block, "imgformat": genesis_meme.genesis_img_format})
+                         "txid": genesis_meme.genesis_txid, "author": genesis_meme.genesis_author, "block": genesis_meme.genesis_kekcoin_block, "imgformat": genesis_meme.genesis_img_format, "status": "confirm"})
 
         # Sync loop
         if genesis_meme.genesis_kekcoin_block < block_height:
-            for block in range(genesis_meme.genesis_kekcoin_block + 1, block_height + 1):
+            block = genesis_meme.genesis_kekcoin_block + 1
+            max_errors = 0
+            while block < block_height + 1:
                 try:
                     sync_block(db, block)
-
                 except InvalidMultihashError as e:
                     logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid ipfs multihash."))
 
@@ -159,9 +199,21 @@ if __name__ == '__main__':
                 except KeyboardInterrupt:
                     # Dump current sync height into a pickle
                     pickle.dump(block - 1, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
-
+                    
+                except IOError as e:
+                    logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid ipfs multihash.%s") % e)
+                    if max_errors < 10:
+                        time.sleep(10)
+                        block = block - 1
+                        max_errors = max_errors + 1
+                    else:
+                        max_errors = 0
+                except KeyboardInterrupt:
+                    # Dump current sync height into a pickle
+                    pickle.dump(block, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
+                block = block + 1
             # Dump current sync height into a pickle
-            pickle.dump(block_height, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
+            pickle.dump(block, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
 
         else:
             logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Blockchain Error', "Kekcoin blockchain syncing..."))
@@ -175,11 +227,14 @@ if __name__ == '__main__':
             synced_height = last_meme['block']
 
         # Sync loop
+        
         if synced_height < block_height:
-            for block in range(synced_height + 1, block_height + 1):
+            block = synced_height + 1
+            max_errors = 0
+            while block < block_height + 1:
                 try:
                     sync_block(db, block)
-                    
+
                 except InvalidMultihashError as e:
                     logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid ipfs multihash."))
 
@@ -196,9 +251,20 @@ if __name__ == '__main__':
                 except KeyboardInterrupt:
                     # Dump current sync height into a pickle
                     pickle.dump(block - 1, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
+                    
+                except IOError as e:
+                    logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Memechain', "Invalid ipfs multihash.%s") % e)
+                    if max_errors < 10:
+                        time.sleep(10)
+                        block = block - 1
+                        max_errors = max_errors + 1
+                    else:
+                        max_errors = 0
+
+                block = block + 1
 
             # Dump current sync height into a pickle
-            pickle.dump(block_height, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
+            pickle.dump(block, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
 
         else:
             logger.error('COMMAND %s Failed %s: %s' % ('Sync', 'Blockchain Error', "Kekcoin blockchain syncing..."))
