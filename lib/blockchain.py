@@ -108,9 +108,9 @@ def create_raw_op_return_transaction(metadata):
             "This tool set does not currently support reading op_return data with less than 4 chars")
 
     input_tx = get_input()
-
+    print(round(float(input_tx["amount"]) - 1.1 * TX_BURN_AMOUNT, 8))
     init_raw_tx = rpc.createrawtransaction([{"txid": input_tx["txid"], "vout": input_tx["vout"]}], {
-                                           input_tx["address"]: TX_BURN_AMOUNT, rpc.getnewaddress(): round(float(input_tx["amount"]) - 1.1 * TX_BURN_AMOUNT, 8)})
+                                           input_tx["address"]: round(float(input_tx["amount"]) - 1.1 * TX_BURN_AMOUNT, 8), rpc.getnewaddress(): TX_BURN_AMOUNT})
 
     oldScriptPubKey = init_raw_tx[len(init_raw_tx) - 60:len(init_raw_tx) - 8]
     newScriptPubKey = b"6a" + hexlify(bytes(chr(len(metadata)), encoding='utf-8')) + hexlify(bytes(metadata, encoding='utf-8'))
