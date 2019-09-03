@@ -43,15 +43,23 @@ class MemeChainDB(object):
     def __init__(self, db_path):
         self._db = TinyDB(db_path)
 
-    def add_meme(self, ipfs_id, hashlink, txid, block, imgformat, author):
+    def add_meme(self, ipfs_id, hashlink, txid, block, imgformat, author, status):
         self._db.insert({"ipfs_id": ipfs_id, "hashlink": hashlink,
-                         "txid": txid, "block": block, "imgformat" : imgformat, "author" : author})
+                         "txid": txid, "block": block, "imgformat" : imgformat, "author" : author, "status": status})
 
     def remove_meme(self, ipfs_id):
         self._db.remove(Query().ipfs_id == ipfs_id)
 
     def get_memechain_height(self):
         return len(self._db)
+
+    def update_meme(self, ipfs_id, block):
+        memes = self._db.search(Query().ipfs_id == ipfs_id)
+        print(memes)
+        for meme in memes:
+            meme["block"] = block
+            meme["status"] = "confirm"
+        self._db.write_back(memes)
 
     def search_by_block(self, block):
         """
@@ -118,6 +126,9 @@ class MemeChainDB(object):
 
     def get_last_meme(self):
         return Index(self._db)[-1]
+
+    def get_all_memes(self):
+        return self._db.search(Query().ipfs_id.exists())
 
     def get_meme_height_by_ipfs_id(self, ipfs_id):
         return Index(self._db).return_index(self._db.get(Query().ipfs_id == ipfs_id)) + 1
