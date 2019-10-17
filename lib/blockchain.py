@@ -29,8 +29,7 @@ def get_blockchain_info():
     Returns:
             getinfo output (dict)
     """
-    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
-                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+    rpc = AuthServiceProxy(("http://%s:%s@%s:%s/") % (config['RPC_USER'], config['RPC_PASS'], config['RPC_IP'], config['RPC_PORT']))
 
     return rpc.getinfo()    
 
@@ -41,8 +40,7 @@ def get_block_height():
     Returns:
             Block height (int)
     """
-    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
-                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+    rpc = AuthServiceProxy(("http://%s:%s@%s:%s/") % (config['RPC_USER'], config['RPC_PASS'], config['RPC_IP'], config['RPC_PORT']))
 
     return rpc.getblockcount()
 
@@ -57,8 +55,7 @@ def get_block_txs(height):
     Returns:
             List of transaction ids (array)
     """
-    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
-                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+    rpc = AuthServiceProxy(("http://%s:%s@%s:%s/") % (config['RPC_USER'], config['RPC_PASS'], config['RPC_IP'], config['RPC_PORT']))
 
     block_hash = rpc.getblockhash(height)
     block = rpc.getblock(block_hash)
@@ -66,27 +63,26 @@ def get_block_txs(height):
     return block['tx']
 
 
-def get_input():
+def get_input(addr):
     """
     Method used to get unspent inputs
 
     Returns:
             Transaction object (dict)
     """
-    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
-                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+    rpc = AuthServiceProxy(("http://%s:%s@%s:%s/") % (config['RPC_USER'], config['RPC_PASS'], config['RPC_IP'], config['RPC_PORT']))
 
     unspent = rpc.listunspent()
 
     for tx in unspent:
-        if float(tx["amount"]) > 0.01:
+        if float(tx["amount"]) > 0.01 and addr == tx['address']:
             return tx
     else:
         raise Exception(
             "No valid inputs, inputs must be greater than 0.001 KEK")
 
 
-def create_raw_op_return_transaction(metadata):
+def create_raw_op_return_transaction(metadata,addr):
     """
     Method used to create a transaction with embedded data through OP_RETURN
 
@@ -97,8 +93,7 @@ def create_raw_op_return_transaction(metadata):
             Raw transaction (hex)
             Author address (str)
     """
-    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
-                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+    rpc = AuthServiceProxy(("http://%s:%s@%s:%s/") % (config['RPC_USER'], config['RPC_PASS'], config['RPC_IP'], config['RPC_PORT']))
 
     if sys.getsizeof(metadata) > MAX_OP_RETURN_BYTES:
         raise Exception("Metadata size is over MAX_OP_RETURN_BYTES")
@@ -107,8 +102,7 @@ def create_raw_op_return_transaction(metadata):
         raise Exception(
             "This tool set does not currently support reading op_return data with less than 4 chars")
 
-    input_tx = get_input()
-    print(round(float(input_tx["amount"]) - 1.1 * TX_BURN_AMOUNT, 8))
+    input_tx = get_input(addr)
     init_raw_tx = rpc.createrawtransaction([{"txid": input_tx["txid"], "vout": input_tx["vout"]}], {
                                            input_tx["address"]: round(float(input_tx["amount"]) - 1.1 * TX_BURN_AMOUNT, 8), rpc.getnewaddress(): TX_BURN_AMOUNT})
 
@@ -121,7 +115,6 @@ def create_raw_op_return_transaction(metadata):
 
     op_return_tx = init_raw_tx.replace(oldScriptPubKey, newScriptPubKey.decode('ascii'))
 
-    print(rpc.decoderawtransaction(op_return_tx)['vout'])
 
     return op_return_tx, input_tx["address"]
 
@@ -136,8 +129,7 @@ def sign_raw_transaction(tx):
     Returns:
             Signed raw transaction (hex)
     """
-    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
-                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+    rpc = AuthServiceProxy(("http://%s:%s@%s:%s/") % (config['RPC_USER'], config['RPC_PASS'], config['RPC_IP'], config['RPC_PORT']))
 
     return rpc.signrawtransaction(tx)["hex"]
 
@@ -152,8 +144,7 @@ def send_raw_transaction(tx_hex):
     Returns:
             Transaction id (str)
     """
-    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
-                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+    rpc = AuthServiceProxy(("http://%s:%s@%s:%s/") % (config['RPC_USER'], config['RPC_PASS'], config['RPC_IP'], config['RPC_PORT']))
 
     return rpc.sendrawtransaction(tx_hex)
 
@@ -169,8 +160,7 @@ def get_op_return_data(txid):
             Embedded metadata (str)
             Author address (str)
     """
-    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
-                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+    rpc = AuthServiceProxy(("http://%s:%s@%s:%s/") % (config['RPC_USER'], config['RPC_PASS'], config['RPC_IP'], config['RPC_PORT']))
 
     raw_tx = rpc.getrawtransaction(txid)
     tx_data = rpc.decoderawtransaction(raw_tx)
@@ -198,8 +188,7 @@ def get_tx_burn_amount(txid):
     Returns: 
         Sum of input values, i.e. burn amount (float) 
     """
-    rpc = AuthServiceProxy(("http://%s:%s@127.0.0.1:%s/") %
-                       (config['RPC_USER'], config['RPC_PASS'], config['RPC_PORT']))
+    rpc = AuthServiceProxy(("http://%s:%s@%s:%s/") % (config['RPC_USER'], config['RPC_PASS'], config['RPC_IP'], config['RPC_PORT']))
 
     raw_tx = rpc.getrawtransaction(txid)
     tx_data = rpc.decoderawtransaction(raw_tx)

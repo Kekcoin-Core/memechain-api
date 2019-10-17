@@ -304,7 +304,7 @@ class add_meme(object):
         new_name = '{img_name}{ext}'.format(img_name=ipfs_id, ext=ext)
         os.rename(image_path, os.path.join(config['DATA_DIR'], new_name))
         # Add to Kekcoin chain
-        memetx = MemeTx(ipfs_id)
+        memetx = MemeTx(ipfs_id, req.params['addr'])
         prev_block_memes = db.get_prev_block_memes()
 
         if prev_block_memes:
@@ -350,7 +350,7 @@ class add_meme(object):
                                        "Meme has not passed validation: ")
         else:
             # Genesis block logic
-            memetx = MemeTx(ipfs_id)
+            memetx = MemeTx(ipfs_id, req.params['addr'])
             memetx.generate_genesis_hashlink()
 
             memetx.blockchain_write()

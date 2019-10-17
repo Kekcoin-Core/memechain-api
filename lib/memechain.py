@@ -98,12 +98,13 @@ class MemeTx(object):
     MemeChain TX object. Used to construct a MemeChainTX.
     """
 
-    def __init__(self, ipfs_id):
+    def __init__(self, ipfs_id, addr):
         # Identifier is first 4 letters of the SHA256 hash of KEK
         self._identifier = '3ae4'
         self.command_bytes = '00'
         self.ipfs_id = ipfs_id
         self._is_valid = False
+        self.addr = addr
 
     def set_is_valid(self, values):
         self._is_valid = values
@@ -152,6 +153,6 @@ class MemeTx(object):
 
     def blockchain_write(self):
         metadata = self._identifier + self.command_bytes + self.ipfs_id + self.hashlink
-        rawtx, self.author = create_raw_op_return_transaction(metadata)
+        rawtx, self.author = create_raw_op_return_transaction(metadata, self.addr)
         signedtx = sign_raw_transaction(rawtx)
         self.txid = send_raw_transaction(signedtx)

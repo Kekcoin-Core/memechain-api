@@ -2,6 +2,7 @@
 	"DATA_DIR" : "/home/parallels/memechain-api/data",
 	"RPC_USER" : "user",
 	"RPC_PASS" : "pass",
+	"RPC_IP" : "127.0.0.1",
 	"RPC_PORT" : "13377",
 	"ALLOWED_IP_ADDRESSES" : [],
 	"ALLOWED_IMAGE_EXTENSIONS" : ["jpg","png","gif"],
