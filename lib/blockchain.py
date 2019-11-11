@@ -20,6 +20,7 @@ with open(os.path.abspath(os.path.join(__file__, "../../config.json")), "r") as 
 
 # OP_RETURN configuration
 TX_BURN_AMOUNT = 0.01 # Amount of KEKs to be burned in MemeTX
+TX_FEE_RATE = 0.001 # Amount of KEKs to be paid as a miner fee
 MAX_OP_RETURN_BYTES = 500
 
 def get_blockchain_info():
@@ -103,10 +104,15 @@ def create_raw_op_return_transaction(metadata,addr):
             "This tool set does not currently support reading op_return data with less than 4 chars")
 
     input_tx = get_input(addr)
-    init_raw_tx = rpc.createrawtransaction([{"txid": input_tx["txid"], "vout": input_tx["vout"]}], {
-                                           input_tx["address"]: round(float(input_tx["amount"]) - 1.1 * TX_BURN_AMOUNT, 8), rpc.getnewaddress(): TX_BURN_AMOUNT})
 
-    oldScriptPubKey = init_raw_tx[len(init_raw_tx) - 60:len(init_raw_tx) - 8]
+    init_raw_tx = rpc.createrawtransaction([{"txid": input_tx["txid"], "vout": input_tx["vout"]}], {
+        rpc.getnewaddress(): TX_BURN_AMOUNT,
+        input_tx["address"]: round(float(input_tx["amount"]) - TX_BURN_AMOUNT - TX_FEE_RATE, 8)})
+
+    for vout in rpc.decoderawtransaction(init_raw_tx)["vout"]:
+        if float(vout["value"]) == TX_BURN_AMOUNT:
+            oldScriptPubKey = "19" + vout["scriptPubKey"]["hex"]
+
     newScriptPubKey = b"6a" + hexlify(bytes(chr(len(metadata)), encoding='utf-8')) + hexlify(bytes(metadata, encoding='utf-8'))
     newScriptPubKey = hexlify(bytes(chr(len(unhexlify(newScriptPubKey))), encoding='utf-8')) + newScriptPubKey
 
@@ -165,17 +171,22 @@ def get_op_return_data(txid):
     raw_tx = rpc.getrawtransaction(txid)
     tx_data = rpc.decoderawtransaction(raw_tx)
 
-    for data in tx_data["vout"]:
-        if data["scriptPubKey"]["asm"][:9] == "OP_RETURN":
-            op_return_data = str(unhexlify(data["scriptPubKey"]["asm"][10:]), encoding='utf-8')
+    if len(tx_data["vout"]) > 1:
+        if tx_data["vout"][0]["scriptPubKey"]["asm"][:9] == "OP_RETURN":
+            op_return_data = str(unhexlify(tx_data["vout"][0]["scriptPubKey"]["asm"][10:]), encoding='utf-8')
+            author = tx_data['vout'][1]['scriptPubKey']['addresses'][0]
+
+        elif tx_data["vout"][1]["scriptPubKey"]["asm"][:9] == "OP_RETURN":
+            op_return_data = str(unhexlify(tx_data["vout"][1]["scriptPubKey"]["asm"][10:]), encoding='utf-8')
+            author = tx_data['vout'][0]['scriptPubKey']['addresses'][0]
+
         else:
             op_return_data = None
+            author = None
+    else:
+        op_return_data = None
+        author = None
 
-    try:
-        author = tx_data['vout'][0]['scriptPubKey']['addresses'][0]
-    except KeyError as e:
-        author = None 
-        
     return op_return_data, author
 
 def get_tx_burn_amount(txid):
