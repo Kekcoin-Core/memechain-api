@@ -98,7 +98,7 @@ class MemeTx(object):
     MemeChain TX object. Used to construct a MemeChainTX.
     """
 
-    def __init__(self, ipfs_id, addr):
+    def __init__(self, ipfs_id, addr=''):
         # Identifier is first 4 letters of the SHA256 hash of KEK
         self._identifier = '3ae4'
         self.command_bytes = '00'

@@ -164,7 +164,7 @@ if __name__ == '__main__':
         # Load genesis meme
         genesis_meme = GenesisMeme()
 
-        memetx = MemeTx(genesis_meme.genesis_ipfs_id)
+        memetx = MemeTx(genesis_meme.genesis_ipfs_id,genesis_meme.genesis_author)
         memetx.generate_genesis_hashlink()
         memetx.txid = genesis_meme.genesis_txid
       
@@ -233,6 +233,7 @@ if __name__ == '__main__':
             max_errors = 0
             while block < block_height + 1:
                 try:
+                    pickle.dump(block, open(os.path.join(config['DATA_DIR'], 'sync.p'), 'wb'))
                     sync_block(db, block)
 
                 except InvalidMultihashError as e:

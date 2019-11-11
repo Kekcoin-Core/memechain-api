@@ -55,6 +55,14 @@ def validate_ip_address(req, resp, resource, params):
             raise falcon.HTTPError(falcon.HTTP_401, 'Memechain Error',
                                    "IP address not allowed.")
 
+def validate_address(req, resp, resource, params):
+    if req.params['addr'] == '':
+        logger.error('COMMAND %s Failed %s: %s'
+                     % ('validate_address', 'Memechain Error',
+                        "Address param must be not null."))
+        raise falcon.HTTPError(falcon.HTTP_400, 'Memechain Error',
+                               "Address param must be not null.")
+
 class get_info(object):
     def on_get(self, req, resp):
         logger.info('COMMAND %s Received' % self.__class__.__name__)
@@ -242,9 +250,13 @@ class add_meme(object):
 
     @falcon.before(validate_ip_address)
     @falcon.before(validate_image_type)
+    @falcon.before(validate_address)
+    
     def on_post(self, req, resp):
         logger.info('COMMAND %s Received' % self.__class__.__name__)
         db = MemeChainDB(os.path.join(config['DATA_DIR'], 'memechain.json'))
+
+
 
         while check_running():
             time.sleep(3)
