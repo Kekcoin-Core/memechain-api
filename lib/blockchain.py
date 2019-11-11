@@ -106,8 +106,7 @@ def create_raw_op_return_transaction(metadata,addr):
     input_tx = get_input(addr)
 
     init_raw_tx = rpc.createrawtransaction([{"txid": input_tx["txid"], "vout": input_tx["vout"]}], {
-        rpc.getnewaddress(): TX_BURN_AMOUNT,
-        input_tx["address"]: round(float(input_tx["amount"]) - TX_BURN_AMOUNT - TX_FEE_RATE, 8)})
+                                           rpc.getnewaddress(): TX_BURN_AMOUNT, input_tx["address"]: round(float(input_tx["amount"]) - TX_BURN_AMOUNT - TX_FEE_RATE, 8)})
 
     for vout in rpc.decoderawtransaction(init_raw_tx)["vout"]:
         if float(vout["value"]) == TX_BURN_AMOUNT:
@@ -120,7 +119,6 @@ def create_raw_op_return_transaction(metadata,addr):
         raise Exception("Something broke!")
 
     op_return_tx = init_raw_tx.replace(oldScriptPubKey, newScriptPubKey.decode('ascii'))
-
 
     return op_return_tx, input_tx["address"]
 
@@ -175,11 +173,11 @@ def get_op_return_data(txid):
         if tx_data["vout"][0]["scriptPubKey"]["asm"][:9] == "OP_RETURN":
             op_return_data = str(unhexlify(tx_data["vout"][0]["scriptPubKey"]["asm"][10:]), encoding='utf-8')
             author = tx_data['vout'][1]['scriptPubKey']['addresses'][0]
-
+        
         elif tx_data["vout"][1]["scriptPubKey"]["asm"][:9] == "OP_RETURN":
             op_return_data = str(unhexlify(tx_data["vout"][1]["scriptPubKey"]["asm"][10:]), encoding='utf-8')
             author = tx_data['vout'][0]['scriptPubKey']['addresses'][0]
-
+        
         else:
             op_return_data = None
             author = None
