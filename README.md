@@ -36,7 +36,7 @@ Then to run the daemon, navigate into the kekcoin-linux-2.0.5 folder and run
 ```
 ./kekcoind
 ```
-The following kekcoin configuration file is recommended
+The following kekcoin configuration file is recommended (we recommend you do not stake with your memechain node)
 ```
 rpcuser=user
 rpcpassword=pass
@@ -45,6 +45,7 @@ listen=1
 daemon=1
 txindex=1
 prune=0
+staking=0
 maxconnections=100
 ```
 - The IPFS software should also be running as a daemon. To install IPFS we recommend using ipfs-update, you can find instructions here https://docs.ipfs.io/guides/guides/install/#installing-with-ipfs-update. Once you have installed IPFS you need to initialize your IPFS node, to do this use
